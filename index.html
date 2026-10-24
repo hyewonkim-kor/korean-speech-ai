@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>한국어 학술 발표 AI 실전 점검 - 1부: 서론</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans KR', 'Inter', sans-serif; background-color: #f8fafc; }
+        .recording-pulse { animation: pulse-red 1.5s infinite; }
+        @keyframes pulse-red {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .loader { border: 3px solid #f3f3f3; border-top: 3px solid #2563eb; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 p-4 md:p-8 flex justify-center items-start">
+
+    <!-- Toast Notification (replaces alert) -->
+    <div id="toast" class="fixed top-5 left-1/2 transform -translate-x-1/2 bg-red-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 transition-opacity duration-300 opacity-0 pointer-events-none flex items-center gap-2 font-medium">
+        <i class="fas fa-exclamation-circle"></i>
+        <span id="toastMsg">에러 메시지</span>
+    </div>
+
+    <div class="w-full max-w-4xl bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
+        
+        <!-- Header -->
+        <header class="bg-slate-800 text-white p-6 md:p-8 text-center">
+            <h1 class="text-2xl md:text-3xl font-bold mb-2">한국어 학술 발표 AI 실전 점검</h1>
+            <div class="inline-block bg-blue-600 text-blue-50 px-4 py-1.5 rounded-full text-sm font-semibold tracking-wide">
+                1부 : 서론 (Introduction)
+            </div>
+            <p class="mt-4 text-slate-300 text-sm">발화 속도, 객관적 수치 발음 정확도, 불필요한 군말 사용을 진단합니다.</p>
+        </header>
+
+        <div class="p-6 md:p-8">
+            <!-- Student Info Section -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 bg-slate-50 p-6 rounded-xl border border-slate-100">
+                <div>
+                    <label for="studentName" class="block text-sm font-semibold text-slate-700 mb-2">이름 (Name)</label>
+                    <input type="text" id="studentName" placeholder="홍길동" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
+                </div>
+                <div>
+                    <label for="topic" class="block text-sm font-semibold text-slate-700 mb-2">발표 주제 (Presentation Topic)</label>
+                    <input type="text" id="topic" placeholder="예: 한국 미디어 콘텐츠의 글로벌 확산과 과제" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
+                </div>
+            </div>
+
+            <!-- Recording Section -->
+            <div class="flex flex-col items-center justify-center mb-8">
+                <div class="text-5xl font-mono text-slate-700 mb-6 font-semibold tracking-wider" id="timerDisplay">00:00</div>
+                
+                <button id="recordBtn" onclick="toggleRecording()" class="w-20 h-20 bg-blue-600 rounded-full text-white shadow-lg shadow-blue-200 transition-all duration-300 hover:bg-blue-700 focus:outline-none flex items-center justify-center text-3xl">
+                    <i class="fas fa-microphone" id="recordIcon"></i>
+                </button>
+                <p id="recordStatus" class="mt-4 text-slate-500 font-medium">마이크를 눌러 서론 발표를 시작하세요</p>
+            </div>
+
+            <!-- STT Transcript Area -->
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="font-semibold text-slate-700"><i class="fas fa-closed-captioning mr-2 text-slate-400"></i>실시간 스크립트</h3>
+                    <span id="speechRateBadge" class="hidden text-xs bg-slate-200 text-slate-700 py-1 px-3 rounded-full font-semibold">속도 계산 대기 중</span>
+                </div>
+                <div id="transcriptBox" class="bg-slate-50 border border-slate-200 rounded-xl p-5 h-48 overflow-y-auto custom-scrollbar text-slate-600 leading-relaxed text-base">
+                    녹음을 시작하면 이곳에 목소리가 텍스트로 변환됩니다. 
+                    (도표의 수치나 연도를 명확하게 발음해 보세요.)
+                </div>
+            </div>
+
+            <!-- Action Button -->
+            <button id="analyzeBtn" onclick="analyzePresentation()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-4 px-4 rounded-xl transition duration-200 shadow-md hidden flex justify-center items-center gap-3 text-lg">
+                <i class="fas fa-robot text-blue-400"></i> AI 평가 받기
+            </button>
+        </div>
+
+        <!-- Results Section (Hidden initially) -->
+        <div id="resultSection" class="hidden border-t border-slate-200 bg-slate-50 p-6 md:p-8">
+            <h2 class="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+                <i class="fas fa-clipboard-check text-blue-600"></i> AI 진단 결과
+                <span id="resNameLabel" class="ml-auto text-sm font-normal text-slate-500"></span>
+            </h2>
+
+            <!-- Top Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div class="bg-white p-5 rounded-xl border border-slate-200 flex flex-col items-center justify-center text-center shadow-sm">
+                    <span class="text-sm text-slate-500 font-semibold mb-2">종합 점수</span>
+                    <div class="text-4xl font-bold text-blue-600" id="resScore">0<span class="text-2xl text-slate-300">/100</span></div>
+                </div>
+                <div class="bg-white p-5 rounded-xl border border-slate-200 flex flex-col items-center justify-center text-center shadow-sm">
+                    <span class="text-sm text-slate-500 font-semibold mb-2">발화 속도 (음절/분)</span>
+                    <div class="text-3xl font-bold text-slate-700" id="resSpeed">0</div>
+                    <span class="text-sm mt-2 font-medium" id="resSpeedText"></span>
+                </div>
+            </div>
+
+            <!-- Detailed Feedback -->
+            <div class="space-y-4">
+                <div class="bg-white p-5 rounded-xl border border-blue-100 shadow-sm">
+                    <h4 class="font-bold text-blue-800 mb-2 flex items-center"><i class="fas fa-comment-medical mr-2"></i>총평</h4>
+                    <p class="text-slate-700 leading-relaxed" id="resSummary"></p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-white p-5 rounded-xl border border-emerald-100 shadow-sm">
+                        <h4 class="font-bold text-emerald-700 mb-2 flex items-center"><i class="fas fa-chart-pie mr-2"></i>수치/데이터 발음 정확도</h4>
+                        <p class="text-slate-700 text-sm leading-relaxed" id="resDataAcc"></p>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl border border-amber-100 shadow-sm">
+                        <h4 class="font-bold text-amber-700 mb-2 flex items-center"><i class="fas fa-filter mr-2"></i>담화 표지 및 군말 점검</h4>
+                        <p class="text-slate-700 text-sm leading-relaxed" id="resFiller"></p>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-xl border border-indigo-100 shadow-sm mt-4">
+                    <h4 class="font-bold text-indigo-800 mb-3 flex items-center"><i class="fas fa-walking mr-2"></i>다음 발표를 위한 행동 계획 (Action Plan)</h4>
+                    <ul class="list-disc list-inside text-sm text-slate-700 space-y-2" id="resActionPlan"></ul>
+                </div>
+            </div>
+            
+            <div class="mt-8 text-center">
+                <button onclick="window.scrollTo(0,0); location.reload();" class="text-slate-500 hover:text-blue-600 font-medium transition-colors">
+                    <i class="fas fa-redo mr-1"></i> 다시 연습하기
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- State Variables ---
+        let isRecording = false;
+        let recognition = null;
+        let finalTranscript = '';
+        let timerInterval = null;
+        let startTime = 0;
+        let durationSeconds = 0;
+        let syllableCount = 0;
+        let calculatedSpeed = 0;
+
+        // Custom Error Message Function (Replaces alert)
+        function showError(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').innerText = msg;
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'pointer-events-none');
+            }, 3000);
+        }
+
+        // --- Web Speech API (STT) Setup ---
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                showError("이 브라우저는 음성 인식을 지원하지 않습니다. Chrome을 사용해주세요.");
+                document.getElementById('recordBtn').disabled = true;
+                return;
+            }
+
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'ko-KR'; 
+
+            recognition.onresult = (event) => {
+                let interimTranscript = '';
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        finalTranscript += event.results[i][0].transcript + ' ';
+                    } else {
+                        interimTranscript += event.results[i][0].transcript;
+                    }
+                }
+                
+                document.getElementById('transcriptBox').innerHTML = `
+                    <span class="text-slate-800">${finalTranscript}</span>
+                    <span class="text-slate-400 italic">${interimTranscript}</span>
+                `;
+                
+                // Auto scroll
+                const box = document.getElementById('transcriptBox');
+                box.scrollTop = box.scrollHeight;
+            };
+
+            recognition.onerror = (event) => {
+                console.error("Speech recognition error", event.error);
+                if(event.error === 'not-allowed') {
+                    showError("마이크 권한을 허용해야 연습할 수 있습니다.");
+                    stopRecording(true);
+                }
+            };
+
+            recognition.onend = () => {
+                // If it stopped but user didn't click stop, try to restart (handles brief silence pauses)
+                if (isRecording) {
+                    try { recognition.start(); } catch(e) {}
+                }
+            };
+        });
+
+        // --- Recording & Timer Logic ---
+        function toggleRecording() {
+            if (!isRecording) {
+                startRecording();
+            } else {
+                stopRecording();
+            }
+        }
+
+        function startRecording() {
+            const name = document.getElementById('studentName').value.trim();
+            if(!name) {
+                showError("이름을 먼저 입력해 주세요.");
+                document.getElementById('studentName').focus();
+                return;
+            }
+
+            finalTranscript = '';
+            durationSeconds = 0;
+            syllableCount = 0;
+            document.getElementById('transcriptBox').innerHTML = '';
+            document.getElementById('analyzeBtn').classList.add('hidden');
+            document.getElementById('resultSection').classList.add('hidden');
+            document.getElementById('speechRateBadge').classList.add('hidden');
+
+            isRecording = true;
+            startTime = Date.now();
+            
+            try {
+                recognition.start();
+            } catch(e) {
+                console.log(e);
+            }
+
+            // UI changes for recording
+            const btn = document.getElementById('recordBtn');
+            btn.classList.replace('bg-blue-600', 'bg-red-500');
+            btn.classList.replace('hover:bg-blue-700', 'hover:bg-red-600');
+            btn.classList.replace('shadow-blue-200', 'shadow-red-200');
+            btn.classList.add('recording-pulse');
+            document.getElementById('recordIcon').classList.replace('fa-microphone', 'fa-stop');
+            document.getElementById('recordStatus').innerText = "서론 발표를 진행해 주세요...";
+            document.getElementById('recordStatus').classList.add('text-red-500', 'font-semibold');
+
+            timerInterval = setInterval(() => {
+                const elapsed = Date.now() - startTime;
+                durationSeconds = Math.floor(elapsed / 1000);
+                const m = String(Math.floor(durationSeconds / 60)).padStart(2, '0');
+                const s = String(durationSeconds % 60).padStart(2, '0');
+                document.getElementById('timerDisplay').innerText = `${m}:${s}`;
+            }, 1000);
+        }
+
+        function stopRecording(isError = false) {
+            isRecording = false;
+            recognition.stop();
+            clearInterval(timerInterval);
+
+            const btn = document.getElementById('recordBtn');
+            btn.classList.replace('bg-red-500', 'bg-blue-600');
+            btn.classList.replace('hover:bg-red-600', 'hover:bg-blue-700');
+            btn.classList.replace('shadow-red-200', 'shadow-blue-200');
+            btn.classList.remove('recording-pulse');
+            document.getElementById('recordIcon').classList.replace('fa-stop', 'fa-microphone');
+            document.getElementById('recordStatus').innerText = "녹음 완료. 다시 누르면 재녹음됩니다.";
+            document.getElementById('recordStatus').classList.remove('text-red-500', 'font-semibold');
+
+            if(isError) return;
+
+            // Compute speed
+            const cleanText = finalTranscript.replace(/\s+/g, '');
+            syllableCount = cleanText.length;
+            
+            calculatedSpeed = 0;
+            if (durationSeconds >= 5) {
+                calculatedSpeed = Math.round((syllableCount / durationSeconds) * 60);
+            }
+
+            const badge = document.getElementById('speechRateBadge');
+            badge.classList.remove('hidden');
+            badge.innerText = durationSeconds < 5 ? `측정 불가 (너무 짧음)` : `분당 약 ${calculatedSpeed}음절`;
+
+            if (finalTranscript.trim().length > 10) {
+                document.getElementById('analyzeBtn').classList.remove('hidden');
+            } else {
+                showError("녹음된 내용이 너무 짧아 평가할 수 없습니다.");
+            }
+        }
+
+        // --- Gemini API Call ---
+        async function analyzePresentation() {
+            const transcript = finalTranscript.trim();
+            const topic = document.getElementById('topic').value.trim() || "지정되지 않음";
+            
+            // UI Loading State
+            const btn = document.getElementById('analyzeBtn');
+            const originalBtnContent = btn.innerHTML;
+            btn.innerHTML = `<div class="loader mr-2"></div> AI가 분석 중입니다...`;
+            btn.disabled = true;
+            btn.classList.add('opacity-70', 'cursor-not-allowed');
+
+            const systemInstruction = "당신은 한국어 학술 발표를 전문적으로 지도하는 대학교수입니다. 외국인 유학생의 '서론' 발표 스크립트를 구체적으로 진단해 주세요. 유학생의 발표이므로, '언론진흥재단'과 '언론 진흥 재단' 같은 단순 띄어쓰기 차이나 미세한 발음 오인식은 오류로 감점하지 말고 관대하게 인정해 줄 것. 오직 의미가 완전히 왜곡되거나 틀린 수치 데이터(예: 87.5%를 다른 숫자로 잘못 발화한 경우)만 엄격하게 평가할 것.";
+            
+            const promptText = `
+                학생 발표 주제: ${topic}
+                녹음된 스크립트:
+                "${transcript}"
+
+                발화 속도: 1분당 ${calculatedSpeed}음절 (권장 속도: 200~250음절)
+
+                다음 항목을 분석하여 JSON 형식으로 응답하세요:
+                1. score: 0~100점 사이 종합 점수
+                2. overall_summary: 교수의 총평 (2-3문장, 따뜻하지만 예리하게)
+                3. data_accuracy_feedback: 통계, 연도, 수치 등이 객관적이고 명확하게 발음되었는지 평가
+                4. filler_words_feedback: '어', '음', '그니까', '이제' 등 불필요한 군말 사용 횟수와 분석
+                5. action_plan: 다음 본론 발표를 위해 개선해야 할 구체적인 행동 계획 3가지 (문장 배열)
+            `;
+
+            const payload = {
+                contents: [{ parts: [{ text: promptText }] }],
+                systemInstruction: { parts: [{ text: systemInstruction }] },
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            "score": { "type": "INTEGER" },
+                            "overall_summary": { "type": "STRING" },
+                            "data_accuracy_feedback": { "type": "STRING" },
+                            "filler_words_feedback": { "type": "STRING" },
+                            "action_plan": { "type": "ARRAY", "items": { "type": "STRING" } }
+                        },
+                        "required": ["score", "overall_summary", "data_accuracy_feedback", "filler_words_feedback", "action_plan"]
+                    }
+                }
+            };
+
+            const apiKey = "AQ.Ab8RN6LnrKVwBMYH2lN2pFHuVYZJdVshNeQgaQqlaGJgqsGtGQ"; // Provided by Canvas runtime
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                if(!response.ok) throw new Error("API 요청 실패");
+
+                const result = await response.json();
+                
+                if (result.candidates && result.candidates[0].content.parts[0].text) {
+                    const data = JSON.parse(result.candidates[0].content.parts[0].text);
+                    renderResults(data);
+                } else {
+                    throw new Error("올바르지 않은 응답 포맷");
+                }
+            } catch (error) {
+                console.error("AI Analysis Error:", error);
+                showError("AI 분석 중 오류가 발생했습니다. 다시 시도해주세요.");
+            } finally {
+                btn.innerHTML = originalBtnContent;
+                btn.disabled = false;
+                btn.classList.remove('opacity-70', 'cursor-not-allowed');
+                btn.classList.add('hidden'); // Hide button after success
+            }
+        }
+
+        // --- Render Result Data ---
+        function renderResults(data) {
+            document.getElementById('resultSection').classList.remove('hidden');
+            document.getElementById('resNameLabel').innerText = `${document.getElementById('studentName').value} 님의 분석 리포트`;
+            
+            // Score
+            document.getElementById('resScore').innerHTML = `${data.score}<span class="text-2xl text-slate-300">/100</span>`;
+            
+            // Speed Analysis
+            document.getElementById('resSpeed').innerText = calculatedSpeed;
+            const speedText = document.getElementById('resSpeedText');
+            if(calculatedSpeed < 250) {
+                speedText.innerText = "조금 느립니다. 자신감을 가지세요.";
+                speedText.className = "text-sm mt-2 font-medium text-amber-600";
+            } else if (calculatedSpeed > 350) {
+                speedText.innerText = "너무 빠릅니다. 조금 천천히 말해보세요.";
+                speedText.className = "text-sm mt-2 font-medium text-red-600";
+            } else {
+                speedText.innerText = "적절하고 안정적인 속도입니다.";
+                speedText.className = "text-sm mt-2 font-medium text-emerald-600";
+            }
+
+            // Text Feedbacks
+            document.getElementById('resSummary').innerText = data.overall_summary;
+            document.getElementById('resDataAcc').innerText = data.data_accuracy_feedback;
+            document.getElementById('resFiller').innerText = data.filler_words_feedback;
+
+            // Action Plan List
+            const ul = document.getElementById('resActionPlan');
+            ul.innerHTML = '';
+            data.action_plan.forEach(item => {
+                const li = document.createElement('li');
+                li.innerText = item;
+                ul.appendChild(li);
+            });
+
+            // Scroll to results smoothly
+            document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
