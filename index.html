@@ -272,10 +272,14 @@
             };
 
             rec.onend = () => {
-                if (isRecording) {
-                    try { rec.start(); } catch(e) {}
-                }
-            };
+    if (isRecording) {
+        try { rec.start(); } catch(e) {}
+    } else {
+        if (finalTranscript.trim().length > 10) {
+            document.getElementById('evalBtn').style.display = 'block';
+        }
+    }
+};
             return rec;
         }
 
@@ -314,10 +318,7 @@
             document.getElementById('startBtn').style.display = 'inline-block';
             document.getElementById('startBtn').innerText = '다시 녹음하기';
             document.getElementById('stopBtn').style.display = 'none';
-            
-            if (finalTranscript.trim().length > 10) {
-                document.getElementById('evalBtn').style.display = 'block';
-            }
+                      
             showToast("녹음이 종료되었습니다.");
         }
 
