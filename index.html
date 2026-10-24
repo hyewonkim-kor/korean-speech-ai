@@ -335,13 +335,24 @@
                     body: JSON.stringify(payload)
                 });
                  
-                const result = await response.json();
+const result = await response.json();
 
-                if (!response.ok) {
-                    // 서버에서 거부했을 때 구체적인 원인을 콘솔과 화면에 띄움
-                    console.error("Gemini API Error Details:", result);
-                    throw new Error(result.error?.message || "API 요청 실패");
-                }
+if (!response.ok) {
+    console.error("Gemini API 오류:", result);
+    throw new Error(
+        result.error?.message || `HTTP 오류 ${response.status}`
+    );
+}
+
+if (result.candidates?.[0]?.content?.parts?.[0]?.text) {
+    const data = JSON.parse(
+        result.candidates[0].content.parts[0].text
+    );
+    renderResults(data);
+} else {
+    console.error("예상과 다른 API 응답:", result);
+    throw new Error("AI 응답에 평가 결과가 없습니다.");
+}
                  
                 if (result.candidates && result.candidates[0].content.parts[0].text) {
                     const aiReply = result.candidates[0].content.parts[0].text;
