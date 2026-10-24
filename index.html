@@ -22,6 +22,7 @@
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         .loader { border: 3px solid #f3f3f3; border-top: 3px solid #2563eb; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .feedback-content { white-space: pre-wrap; line-height: 1.6; }
     </style>
 </head>
 <body class="min-h-screen text-slate-800 p-4 md:p-8 flex justify-center items-start">
@@ -94,41 +95,25 @@
             <!-- Top Cards -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 <div class="bg-white p-5 rounded-xl border border-slate-200 flex flex-col items-center justify-center text-center shadow-sm">
-                    <span class="text-sm text-slate-500 font-semibold mb-2">종합 점수</span>
-                    <div class="text-4xl font-bold text-blue-600" id="resScore">0<span class="text-2xl text-slate-300">/100</span></div>
-                </div>
-                <div class="bg-white p-5 rounded-xl border border-slate-200 flex flex-col items-center justify-center text-center shadow-sm">
                     <span class="text-sm text-slate-500 font-semibold mb-2">발화 속도 (음절/분)</span>
                     <div class="text-3xl font-bold text-slate-700" id="resSpeed">0</div>
                     <span class="text-sm mt-2 font-medium" id="resSpeedText"></span>
                 </div>
+                <div class="bg-white p-5 rounded-xl border border-slate-200 flex flex-col items-center justify-center text-center shadow-sm">
+                    <span class="text-sm text-slate-500 font-semibold mb-2">평가 상태</span>
+                    <div class="text-xl font-bold text-blue-600 mt-2">분석 완료</div>
+                </div>
             </div>
 
-            <!-- Detailed Feedback -->
+            <!-- Detailed Feedback (Markdown/Text) -->
             <div class="space-y-4">
-                <div class="bg-white p-5 rounded-xl border border-blue-100 shadow-sm">
-                    <h4 class="font-bold text-blue-800 mb-2 flex items-center"><i class="fas fa-comment-medical mr-2"></i>총평</h4>
-                    <p class="text-slate-700 leading-relaxed" id="resSummary"></p>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="bg-white p-5 rounded-xl border border-emerald-100 shadow-sm">
-                        <h4 class="font-bold text-emerald-700 mb-2 flex items-center"><i class="fas fa-chart-pie mr-2"></i>수치/데이터 발음 정확도</h4>
-                        <p class="text-slate-700 text-sm leading-relaxed" id="resDataAcc"></p>
-                    </div>
-                    <div class="bg-white p-5 rounded-xl border border-amber-100 shadow-sm">
-                        <h4 class="font-bold text-amber-700 mb-2 flex items-center"><i class="fas fa-filter mr-2"></i>수업 표현 및 담화 표지 / 군말 점검</h4>
-                        <p class="text-slate-700 text-sm leading-relaxed" id="resFiller"></p>
-                    </div>
-                </div>
-
-                <div class="bg-white p-5 rounded-xl border border-indigo-100 shadow-sm mt-4">
-                    <h4 class="font-bold text-indigo-800 mb-3 flex items-center"><i class="fas fa-walking mr-2"></i>다음 발표를 위한 행동 계획 (Action Plan)</h4>
-                    <ul class="list-disc list-inside text-sm text-slate-700 space-y-2" id="resActionPlan"></ul>
+                <div class="bg-white p-6 rounded-xl border border-blue-100 shadow-sm">
+                    <h4 class="font-bold text-blue-800 mb-3 flex items-center text-lg"><i class="fas fa-comment-medical mr-2"></i>종합 진단 및 피드백 리포트</h4>
+                    <div id="resContent" class="text-slate-700 feedback-content text-base"></div>
                 </div>
             </div>
              
-            <!-- PDF 저장 버튼 추가 -->
+            <!-- PDF 저장 버튼 -->
             <div class="mt-6">
                 <button id="pdfBtn" onclick="downloadPDF()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-4 rounded-xl transition duration-200 shadow-md flex justify-center items-center gap-2 text-base">
                     <i class="fas fa-file-pdf"></i> PDF로 결과 저장하기
@@ -155,7 +140,6 @@
         let syllableCount = 0;
         let calculatedSpeed = 0;
 
-        // Custom Error Message Function
         function showError(msg) {
             const toast = document.getElementById('toast');
             document.getElementById('toastMsg').innerText = msg;
@@ -247,7 +231,6 @@
                 console.log(e);
             }
 
-            // UI changes for recording
             const btn = document.getElementById('recordBtn');
             btn.classList.replace('bg-blue-600', 'bg-red-500');
             btn.classList.replace('hover:bg-blue-700', 'hover:bg-red-600');
@@ -282,7 +265,6 @@
 
             if(isError) return;
 
-            // Compute speed
             const cleanText = finalTranscript.replace(/\s+/g, '');
             syllableCount = cleanText.length;
              
@@ -302,7 +284,7 @@
             }
         }
 
-        // --- Gemini API Call with 200~250 speed & Class Expressions ---
+        // --- Gemini API Call (Robust Text/Markdown Response) ---
         async function analyzePresentation() {
             const transcript = finalTranscript.trim();
             const topic = document.getElementById('topic').value.trim() || "지정되지 않음";
@@ -332,31 +314,17 @@
 
                 발화 속도: 1분당 ${calculatedSpeed}음절 (권장 속도: 200~250음절)
 
-                다음 항목을 분석하여 JSON 형식으로 응답하세요:
-                1. score: 0~100점 사이 종합 점수 (수업 표현 활용 시 가점 부여)
-                2. overall_summary: 교수의 총평 (2-3문장, 따뜻하지만 예리하게)
-                3. data_accuracy_feedback: 통계, 연도, 수치 등이 객관적이고 명확하게 발음되었는지 평가
-                4. filler_words_feedback: 수업 필수 표현(출처, 대조 등) 활용 여부 및 '어', '음' 등 군말 사용 분석
-                5. action_plan: 다음 발표를 위해 개선해야 할 구체적인 행동 계획 3가지 (문장 배열)
+                다음 항목을 포함하여 가독성 좋은 마크다운 형식으로 피드백을 작성해주세요:
+                1. 교수 총평 (따뜻하지만 예리하게)
+                2. 발화 속도 평가 (200~250 기준 진단)
+                3. 수치/데이터 및 군말 점검
+                4. 수업 필수 표현(출처, 대조, 담화 표지 등) 활용 분석 및 칭찬
+                5. 다음 본론 발표를 위한 구체적인 행동 계획(Action Plan) 3가지
             `;
 
             const payload = {
                 contents: [{ parts: [{ text: promptText }] }],
-                systemInstruction: { parts: [{ text: systemInstruction }] },
-                generationConfig: {
-                    responseMimeType: "application/json",
-                    responseSchema: {
-                        type: "OBJECT",
-                        properties: {
-                            "score": { "type": "INTEGER" },
-                            "overall_summary": { "type": "STRING" },
-                            "data_accuracy_feedback": { "type": "STRING" },
-                            "filler_words_feedback": { "type": "STRING" },
-                            "action_plan": { "type": "ARRAY", "items": { "type": "STRING" } }
-                        },
-                        required: ["score", "overall_summary", "data_accuracy_feedback", "filler_words_feedback", "action_plan"]
-                    }
-                }
+                systemInstruction: { parts: [{ text: systemInstruction }] }
             };
 
             const apiKey = "AQ.Ab8RN6LnrKVwBMYH2lN2pFHuVYZJdVshNeQgaQqlaGJgqsGtGQ"; // 본인의 API 키 입력
@@ -374,8 +342,8 @@
                 const result = await response.json();
                  
                 if (result.candidates && result.candidates[0].content.parts[0].text) {
-                    const data = JSON.parse(result.candidates[0].content.parts[0].text);
-                    renderResults(data);
+                    const aiReply = result.candidates[0].content.parts[0].text;
+                    renderResults(aiReply);
                 } else {
                     throw new Error("올바르지 않은 응답 포맷");
                 }
@@ -391,18 +359,15 @@
         }
 
         // --- Render Result Data ---
-        function renderResults(data) {
+        function renderResults(aiReply) {
             document.getElementById('resultSection').classList.remove('hidden');
             document.getElementById('resNameLabel').innerText = `${document.getElementById('studentName').value} 님의 분석 리포트`;
              
-            // Score
-            document.getElementById('resScore').innerHTML = `${data.score}<span class="text-2xl text-slate-300">/100</span>`;
-             
-            // Speed Analysis (200~250 기준 적용)
+            // Speed Analysis
             document.getElementById('resSpeed').innerText = calculatedSpeed;
             const speedText = document.getElementById('resSpeedText');
             if(calculatedSpeed < 200) {
-                speedText.innerText = "조금 느립니다. 조금 더 활기차게 발표해 보세요.";
+                speedText.innerText = "조금 느립니다. 활기차게 발표해 보세요.";
                 speedText.className = "text-sm mt-2 font-medium text-amber-600";
             } else if (calculatedSpeed > 250) {
                 speedText.innerText = "다소 빠릅니다. 200~250 속도를 유지해 보세요.";
@@ -412,19 +377,8 @@
                 speedText.className = "text-sm mt-2 font-medium text-emerald-600";
             }
 
-            // Text Feedbacks
-            document.getElementById('resSummary').innerText = data.overall_summary;
-            document.getElementById('resDataAcc').innerText = data.data_accuracy_feedback;
-            document.getElementById('resFiller').innerText = data.filler_words_feedback;
-
-            // Action Plan List
-            const ul = document.getElementById('resActionPlan');
-            ul.innerHTML = '';
-            data.action_plan.forEach(item => {
-                const li = document.createElement('li');
-                li.innerText = item;
-                ul.appendChild(li);
-            });
+            // Set Feedback Text
+            document.getElementById('resContent').innerText = aiReply;
 
             // Scroll to results smoothly
             document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth' });
@@ -434,7 +388,7 @@
         function downloadPDF() {
             const element = document.getElementById('resultSection');
             const pdfBtn = document.getElementById('pdfBtn');
-            pdfBtn.style.display = 'none'; // PDF 저장 중 버튼 숨김
+            pdfBtn.style.display = 'none';
 
             const opt = {
                 margin:       10,
@@ -445,7 +399,7 @@
             };
 
             html2pdf().from(element).set(opt).save().then(() => {
-                pdfBtn.style.display = 'flex'; // 버튼 복원
+                pdfBtn.style.display = 'flex';
             });
         }
     </script>
