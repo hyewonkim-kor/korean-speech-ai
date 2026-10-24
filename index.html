@@ -208,27 +208,28 @@
         }
 
         async function startRecording() {
-            const name = document.getElementById('studentName').value.trim();
+            const nameInput = document.getElementById('studentName');
+            const name = nameInput ? nameInput.value.trim() : "";
             if(!name) {
                 showError("이름을 먼저 입력해 주세요.");
-                document.getElementById('studentName').focus();
+                if(nameInput) nameInput.focus();
                 return;
             }
 
-            // [수정됨] 녹음 버튼을 누르는 순간 마이크 권한 요청 및 오디오 스트림 확보
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 mediaRecorder = new MediaRecorder(stream);
                 audioChunks = [];
                 
-                mediaRecorder.ondataavailable = (event) => {
+                mediaRecorder.ondataavailable = function(event) {
                     audioChunks.push(event.data);
                 };
                 
-                mediaRecorder.onstop = () => {
+                mediaRecorder.onstop = function() {
                     audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
                     const audioUrl = URL.createObjectURL(audioBlob);
-                    document.getElementById('audioPlayback').src = audioUrl;
+                    const audioElem = document.getElementById('audioPlayback');
+                    if(audioElem) audioElem.src = audioUrl;
                 };
 
                 mediaRecorder.start();
@@ -255,13 +256,12 @@
             }
 
             const btn = document.getElementById('recordBtn');
-            btn.classList.replace('bg-blue-600', 'bg-red-500');
-            btn.classList.replace('hover:bg-blue-700', 'hover:bg-red-600');
-            btn.classList.replace('shadow-blue-200', 'shadow-red-200');
-            btn.classList.add('recording-pulse');
-            document.getElementById('recordIcon').classList.replace('fa-microphone', 'fa-stop');
-            document.getElementById('recordStatus').innerText = "서론 발표를 진행해 주세요...";
-            document.getElementById('recordStatus').classList.add('text-red-500', 'font-semibold');
+            btn.className = "w-20 h-20 bg-red-500 rounded-full text-white shadow-lg shadow-red-200 transition-all duration-300 hover:bg-red-600 focus:outline-none flex items-center justify-center text-3xl recording-pulse";
+            document.getElementById('recordIcon').className = "fas fa-stop";
+            
+            const statusElem = document.getElementById('recordStatus');
+            statusElem.innerText = "서론 발표를 진행해 주세요...";
+            statusElem.className = "mt-4 text-red-500 font-semibold";
 
             timerInterval = setInterval(() => {
                 const elapsed = Date.now() - startTime;
@@ -281,13 +281,12 @@
             clearInterval(timerInterval);
 
             const btn = document.getElementById('recordBtn');
-            btn.classList.replace('bg-red-500', 'bg-blue-600');
-            btn.classList.replace('hover:bg-red-600', 'hover:bg-blue-700');
-            btn.classList.replace('shadow-red-200', 'shadow-blue-200');
-            btn.classList.remove('recording-pulse');
-            document.getElementById('recordIcon').classList.replace('fa-stop', 'fa-microphone');
-            document.getElementById('recordStatus').innerText = "녹음 완료. 다시 누르면 재녹음됩니다.";
-            document.getElementById('recordStatus').classList.remove('text-red-500', 'font-semibold');
+            btn.className = "w-20 h-20 bg-blue-600 rounded-full text-white shadow-lg shadow-blue-200 transition-all duration-300 hover:bg-blue-700 focus:outline-none flex items-center justify-center text-3xl";
+            document.getElementById('recordIcon').className = "fas fa-microphone";
+            
+            const statusElem = document.getElementById('recordStatus');
+            statusElem.innerText = "녹음 완료. 다시 누르면 재녹음됩니다.";
+            statusElem.className = "mt-4 text-slate-500 font-medium";
 
             if(isError) return;
 
@@ -310,10 +309,10 @@
             }
         }
 
-        // --- Gemini API Call (안정성 강화 및 에러 핸들링) ---
         async function analyzePresentation() {
             const transcript = finalTranscript.trim();
-            const topic = document.getElementById('topic'].value.trim() || "지정되지 않음";
+            const topicInput = document.getElementById('topic');
+            const topic = topicInput ? topicInput.value.trim() : "지정되지 않음";
              
             const btn = document.getElementById('analyzeBtn');
             const originalBtnContent = btn.innerHTML;
@@ -321,37 +320,14 @@
             btn.disabled = true;
             btn.classList.add('opacity-70', 'cursor-not-allowed');
 
-            const fullPrompt = `
-[역할]
-당신은 한국어 학술 발표(미디어·문화 전공)를 지도하는 대학교수입니다. 외국인 유학생의 '서론' 발표 스크립트와 발화 속도를 분석해 주세요.
-
-[분석 정보]
-- 학생 발표 주제: ${topic}
-- 발화 속도: 분당 ${calculatedSpeed}음절 (이상적인 속도: 200~250음절)
-- 발표 스크립트: "${transcript}"
-
-[평가 및 피드백 작성 가이드]
-1. 발화 속도 평가: 분당 200~250음절 기준에 적절한지 진단해 주세요.
-2. 수업 필수 표현 및 담화 표지 활용 평가 (가점 요소):
-   - 주제 소개 / 개요: "제 발표 주제는~", "오늘 발표할 내용은 먼저~" 등
-   - 자료 출처: "~에 따르면~", "~에서 ~을 대상으로 조사한 결과~" 등
-   - 자료 분석 / 의견: "~을 차지하다", "먼저 ~다는 의견이 있다. 반면에~" 등
-   - 비교 / 대조: "~와 마찬가지로", "~과 달리", "~는 반면에" 등
-   - 전환 / 결론: "다음으로 ~을 살펴보겠습니다", "지금까지 말씀드린 것을 통해 ~다는 결론을 내릴 수 있습니다" 등
-   - 마무리 / 도입: "지금까지 ~를 살펴보았습니다", "이 발표에서는 ~를 논의했는데요", "이상으로 ~에 대해서 말씀드렸습니다" 등
-   - 정의하기: "~란 ~를 의미합니다", "~는/은 ~이라고 할 수 있습니다", "~는/은 일반적으로 ~으로 정의됩니다" 등
-3. 데이터 및 유창성 점검: 수치 데이터 발음과 군말 여부를 살펴봐 주세요.
-4. Action Plan: 다음 발표를 위한 행동 계획 3가지를 제시해 주세요.
-
-가독성 좋은 마크다운 형식으로 따뜻하지만 예리하게 피드백 리포트를 작성해 주세요.
-            `;
+            const fullPrompt = "당신은 한국어 학술 발표(미디어·문화 전공)를 지도하는 대학교수입니다. 외국인 유학생의 '서론' 발표 스크립트와 발화 속도를 분석해 주세요.\n\n[분석 정보]\n- 학생 발표 주제: " + topic + "\n- 발화 속도: 분당 " + calculatedSpeed + "음절 (이상적인 속도: 200~250음절)\n- 발표 스크립트: \"" + transcript + "\"\n\n[평가 및 피드백 작성 가이드]\n1. 발화 속도 평가: 분당 200~250음절 기준에 적절한지 진단해 주세요.\n2. 수업 필수 표현 및 담화 표지 활용 평가 (가점 요소):\n   - 주제 소개 / 개요: \"제 발표 주제는~\", \"오늘 발표할 내용은 먼저~\" 등\n   - 자료 출처: \"~에 따르면~\", \"~에서 ~을 대상으로 조사한 결과~\" 등\n   - 자료 분석 / 의견: \"~을 차지하다\", \"먼저 ~다는 의견이 있다. 반면에~\" 등\n   - 비교 / 대조: \"~와 마찬가지로\", \"~과 달리\", \"~는 반면에\" 등\n   - 전환 / 결론: \"다음으로 ~을 살펴보겠습니다\", \"지금까지 말씀드린 것을 통해 ~다는 결론을 내릴 수 있습니다\" 등\n   - 마무리 / 도입: \"지금까지 ~를 살펴보았습니다\", \"이 발표에서는 ~를 논의했는데요\", \"이상으로 ~에 대해서 말씀드렸습니다\" 등\n   - 정의하기: \"~란 ~를 의미합니다\", \"~는/은 ~이라고 할 수 있습니다\", \"~는/은 일반적으로 ~으로 정의됩니다\" 등\n3. 데이터 및 유창성 점검: 수치 데이터 발음과 군말 여부를 살펴봐 주세요.\n4. Action Plan: 다음 발표를 위한 행동 계획 3가지를 제시해 주세요.\n\n가독성 좋은 마크다운 형식으로 따뜻하지만 예리하게 피드백 리포트를 작성해 주세요.";
 
             const payload = {
                 contents: [{ parts: [{ text: fullPrompt }] }]
             };
 
             const apiKey = "AQ.Ab8RN6LnrKVwBMYH2lN2pFHuVYZJdVshNeQgaQqlaGJgqsGtGQ"; // 본인의 실제 API 키를 입력하세요
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+            const apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + apiKey;
 
             try {
                 const response = await fetch(apiUrl, {
@@ -384,7 +360,8 @@
 
         function renderResults(aiReply) {
             document.getElementById('resultSection').classList.remove('hidden');
-            document.getElementById('resNameLabel').innerText = `${document.getElementById('studentName').value} 님의 분석 리포트`;
+            const nameInput = document.getElementById('studentName');
+            document.getElementById('resNameLabel').innerText = (nameInput ? nameInput.value : "") + " 님의 분석 리포트";
              
             document.getElementById('resSpeed').innerText = calculatedSpeed;
             const speedText = document.getElementById('resSpeedText');
