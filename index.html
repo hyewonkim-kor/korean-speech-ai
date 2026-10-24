@@ -9,7 +9,7 @@
     <!-- PDF 저장을 위한 라이브러리 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        /* 순수 CSS (Vanilla CSS) 디자인 - Tailwind 제거 */
+        /* 순수 CSS (Vanilla CSS) 디자인 */
         :root {
             --primary: #4F46E5;
             --primary-hover: #4338CA;
@@ -166,7 +166,7 @@
 </head>
 <body>
 
-    <!-- 🚨 중요: 여기에 선생님의 실제 API 키를 넣으세요! 화면엔 보이지 않습니다. -->
+    <!-- 🚨 16번째 줄: 여기에 선생님의 실제 API 키를 넣으세요! 따옴표를 지우지 마세요. -->
     <input type="hidden" id="apiKey" value="AQ.Ab8RN6LnrKVwBMYH2lN2pFHuVYZJdVshNeQgaQqlaGJgqsGtGQ">
 
     <div class="header">
@@ -179,7 +179,7 @@
     <!-- 전체 화면을 PDF로 캡처하기 위한 래퍼 -->
     <div id="pdf-content">
         <div class="container">
-            <!-- 왼쪽 패널 (컨트롤, 상태, 스크립트 - 크기 축소) -->
+            <!-- 왼쪽 패널 (컨트롤, 상태, 스크립트) -->
             <div class="left-panel">
                 <div class="card">
                     <div class="controls">
@@ -211,7 +211,7 @@
                 </div>
             </div>
 
-            <!-- 오른쪽 패널 (AI 분석 결과 - 크기 확대) -->
+            <!-- 오른쪽 패널 (AI 분석 결과) -->
             <div class="right-panel">
                 <div class="card" style="height: 100%;">
                     <h2>📊 AI 학술 평가 결과</h2>
@@ -298,7 +298,6 @@
             };
 
             rec.onend = () => {
-                // 무음으로 끊겨도 녹음 상태면 자동 재시작
                 if (isRecording) {
                     try { rec.start(); } catch(e) {}
                 }
@@ -370,9 +369,9 @@
             }
         }
 
-// --- 2. Gemini API 학술 평가 로직 ---
+        // --- 2. Gemini API 학술 평가 로직 ---
         async function evaluateScript() {
-            // 💡 수정됨: API 키의 공백과 잘못 들어간 따옴표를 자동 제거합니다.
+            // ✅ 오류 수정 완료: API 키 입력 시 실수로 들어간 공백이나 따옴표를 모두 제거하여 404 에러 방지
             const rawKey = document.getElementById('apiKey').value;
             const apiKey = rawKey.trim().replace(/['"]/g, ''); 
 
@@ -387,81 +386,4 @@
                 return;
             }
 
-            document.getElementById('evalBtn').disabled = true;
-            document.getElementById('emptyResult').style.display = 'none';
-            document.getElementById('resultArea').style.display = 'none';
-            document.getElementById('loading').style.display = 'block';
-
-            // 15가지 학술 표현 리스트 (프롬프트용)
-            const criteriaPrompt = `
-다음 15가지 담화 표지 및 표현을 기준으로 평가해줘.
-1) 발표 주제 소개하기 (예: 제 발표 주제는 ~입니다)
-2) 발표 개요 제시하기 (예: 제 발표는 크게 ~부분으로 이루어졌습니다)
-3) 자료 출처 밝히기 (예: ~에 따르면)
-4) 자료 분석하기 (예: ~을 차지하다, ~으로 나타났다)
-5) 다음 항목으로 넘어가기 (예: 다음으로 ~을 살펴보겠습니다)
-6) 자료 제시하기 (예: 이 그림을 봐 주십시오)
-7) 평가하기 (예: ~다는 점에서 의의가 있다)
-8) 정의하기 (예: ~란 ~를 말합니다)
-9) 개념의 핵심 특징 설명하기 (예: ~의 핵심은 ~에 있습니다)
-10) 비교하기 (예: ~와 마찬가지로, ~과 공통점이 있다)
-11) 대조하기 (예: ~과 달리, ~는 반면에)
-12) 의견 소개하기 (예: 전문가 ~는 ~다고 주장합니다)
-13) 전문가 의견을 나의 주장과 연결 (예: 이를 통해 ~을 확인할 수 있습니다)
-14) 마무리 도입 (예: 지금까지 ~를 살펴보았습니다)
-15) 결론 제시하기 (예: ~다고 결론을 내릴 수 있습니다)
-`;
-
-            const systemPrompt = `
-너는 한국어 학술 발표 평가 전문가야. 학생의 발표 스크립트를 분석하고 반드시 순수한 JSON 형식으로만 응답해. 백틱(\`\`\`)이나 추가 설명 없이 JSON만 반환해.
-
-평가 기준:
-${criteriaPrompt}
-
-규칙:
-1. 100점 만점으로 점수를 환산해줘 (totalScore). 기본 발표 내용 점수에, 위 15개 항목 중 발견된 표현 1개당 가산점을 부여해서 계산해.
-2. 학생이 사용한 표현 카테고리 목록을 찾아 (used).
-3. 사용하지 않은 카테고리 목록을 찾아 (missed).
-4. 개선을 위한 따뜻하고 전문적인 종합 피드백(feedback)을 작성해.
-
-JSON 응답 구조 예시:
-{
-  "totalScore": 85,
-  "used": ["발표 주제 소개하기", "다음 항목으로 넘어가기"],
-  "missed": ["결론 제시하기", "자료 출처 밝히기"],
-  "feedback": "도입부가 훌륭합니다. 하지만 출처를 밝히는 표현을 추가하면 전문성이 높아집니다."
-}`;
-
-            try {
-                // 💡 수정됨: 모델 이름을 gemini-1.5-flash-latest 로 명시하고, REST API 표준 규격(system_instruction) 적용
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        system_instruction: { parts: [{ text: systemPrompt }] },
-                        contents: [{ parts: [{ text: text }] }]
-                    })
-                });
-
-                if (!response.ok) {
-                    throw new Error(`API 요청 실패 (상태 코드: ${response.status})`);
-                }
-
-                const data = await response.json();
-                let responseText = data.candidates[0].content.parts[0].text.trim();
-                
-                // 마크다운 백틱 제거
-                responseText = responseText.replace(/```json/g, '').replace(/```/g, '');
-                
-                const resultJSON = JSON.parse(responseText);
-                displayResults(resultJSON);
-
-            } catch (error) {
-                console.error("상세 에러 내용:", error);
-                showToast("평가 중 오류가 발생했습니다. API 키가 정확한지 다시 한번 확인해주세요.");
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('emptyResult').style.display = 'block';
-            } finally {
-                document.getElementById('evalBtn').disabled = false;
-            }
-        }
+            document.getElementById('eval
