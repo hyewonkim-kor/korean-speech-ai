@@ -85,7 +85,7 @@
             </button>
         </div>
 
-        <!-- Results Section (PDF 다운로드 대상 영역) -->
+        <!-- Results Section -->
         <div id="resultSection" class="hidden border-t border-slate-200 bg-slate-50 p-6 md:p-8">
             <h2 class="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
                 <i class="fas fa-clipboard-check text-blue-600"></i> AI 진단 결과
@@ -99,7 +99,6 @@
                     <div class="text-3xl font-bold text-slate-700" id="resSpeed">0</div>
                     <span class="text-sm mt-2 font-medium" id="resSpeedText"></span>
                 </div>
-                <!-- 내 발표 다시 듣기 카드 추가 -->
                 <div class="bg-white p-5 rounded-xl border border-slate-200 flex flex-col items-center justify-center text-center shadow-sm">
                     <span class="text-sm text-slate-500 font-semibold mb-2">내 발표 음성 다시 듣기</span>
                     <audio id="audioPlayback" controls class="w-full mt-2 h-10"></audio>
@@ -140,7 +139,6 @@
         let syllableCount = 0;
         let calculatedSpeed = 0;
         
-        // 오디오 녹음 저장을 위한 변수
         let mediaRecorder;
         let audioChunks = [];
         let audioBlob = null;
@@ -154,7 +152,7 @@
             }, 3000);
         }
 
-        document.addEventListener('DOMContentLoaded', async () => {
+        document.addEventListener('DOMContentLoaded', () => {
             if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
                 showError("이 브라우저는 음성 인식을 지원하지 않습니다. Chrome을 사용해주세요.");
                 document.getElementById('recordBtn').disabled = true;
@@ -199,22 +197,6 @@
                     try { recognition.start(); } catch(e) {}
                 }
             };
-
-            // 마이크 오디오 스트림 미리 확보 (다시 듣기용)
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(stream);
-                mediaRecorder.ondataavailable = (event) => {
-                    audioChunks.push(event.data);
-                };
-                mediaRecorder.onstop = () => {
-                    audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                    const audioUrl = URL.createObjectURL(audioBlob);
-                    document.getElementById('audioPlayback').src = audioUrl;
-                };
-            } catch (e) {
-                console.warn("오디오 녹음 권한 획득 실패:", e);
-            }
         });
 
         function toggleRecording() {
@@ -225,7 +207,7 @@
             }
         }
 
-        function startRecording() {
+        async function startRecording() {
             const name = document.getElementById('studentName').value.trim();
             if(!name) {
                 showError("이름을 먼저 입력해 주세요.");
@@ -233,10 +215,31 @@
                 return;
             }
 
+            // [수정됨] 녹음 버튼을 누르는 순간 마이크 권한 요청 및 오디오 스트림 확보
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+                
+                mediaRecorder.ondataavailable = (event) => {
+                    audioChunks.push(event.data);
+                };
+                
+                mediaRecorder.onstop = () => {
+                    audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    document.getElementById('audioPlayback').src = audioUrl;
+                };
+
+                mediaRecorder.start();
+            } catch (e) {
+                showError("마이크 권한이 거부되었거나 사용 불가 상태입니다.");
+                return;
+            }
+
             finalTranscript = '';
             durationSeconds = 0;
             syllableCount = 0;
-            audioChunks = [];
             document.getElementById('transcriptBox').innerHTML = '';
             document.getElementById('analyzeBtn').classList.add('hidden');
             document.getElementById('resultSection').classList.add('hidden');
@@ -247,9 +250,6 @@
              
             try {
                 recognition.start();
-                if (mediaRecorder && mediaRecorder.state === "inactive") {
-                    mediaRecorder.start();
-                }
             } catch(e) {
                 console.log(e);
             }
@@ -274,7 +274,7 @@
 
         function stopRecording(isError = false) {
             isRecording = false;
-            recognition.stop();
+            try { recognition.stop(); } catch(e) {}
             if (mediaRecorder && mediaRecorder.state === "recording") {
                 mediaRecorder.stop();
             }
@@ -303,17 +303,17 @@
             badge.classList.remove('hidden');
             badge.innerText = durationSeconds < 5 ? `측정 불가 (너무 짧음)` : `분당 약 ${calculatedSpeed}음절`;
 
-            if (finalTranscript.trim().length > 5) {
+            if (finalTranscript.trim().length > 3) {
                 document.getElementById('analyzeBtn').classList.remove('hidden');
             } else {
                 showError("녹음된 내용이 너무 짧아 평가할 수 없습니다.");
             }
         }
 
-        // --- Gemini API Call (Updated with full criteria) ---
+        // --- Gemini API Call (안정성 강화 및 에러 핸들링) ---
         async function analyzePresentation() {
             const transcript = finalTranscript.trim();
-            const topic = document.getElementById('topic').value.trim() || "지정되지 않음";
+            const topic = document.getElementById('topic'].value.trim() || "지정되지 않음";
              
             const btn = document.getElementById('analyzeBtn');
             const originalBtnContent = btn.innerHTML;
@@ -350,7 +350,7 @@
                 contents: [{ parts: [{ text: fullPrompt }] }]
             };
 
-            const apiKey = "AQ.Ab8RN6LnrKVwBMYH2lN2pFHuVYZJdVshNeQgaQqlaGJgqsGtGQ"; // 본인의 실제 API 키로 교체하세요
+            const apiKey = "AQ.Ab8RN6LnrKVwBMYH2lN2pFHuVYZJdVshNeQgaQqlaGJgqsGtGQ"; // 본인의 실제 API 키를 입력하세요
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
             try {
