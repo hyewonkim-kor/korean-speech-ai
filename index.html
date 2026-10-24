@@ -63,7 +63,6 @@
             font-size: 15px;
             line-height: 1.4;
         }
-        /* PDF로 변환될 영역 스타일 */
         #result-area {
             background: white;
             padding: 20px;
@@ -102,7 +101,7 @@
     <h1>미디어·문화 전공 학술 발표 실전 점검</h1>
     
     <div class="guide-box">
-        <strong>[안내]</strong> 서론 발표 대본을 바탕으로 마이크 녹음을 시작하세요. 분당 200~250음절의 적정 속도를 유지하며, 통계 데이터와 학습한 담화 표지를 포함해 주세요!
+        <strong>[안내]</strong> 분당 200~250음절의 적정 속도를 유지하고, 수업 시간에 배운 <strong>발표 주제 소개, 자료 출처 밝히기, 대조·비교, 담화 표지</strong> 등의 필수 표현을 활용하여 녹음을 진행해 주세요!
     </div>
 
     <div class="btn-container">
@@ -117,7 +116,6 @@
         <div id="transcript-container">녹음된 내용이 여기에 표시됩니다...</div>
     </div>
 
-    <!-- PDF 저장 대상 영역 -->
     <div id="result-area">
         <div class="result-title">AI 실전 평가 리포트</div>
         <div id="feedback" class="feedback-content"></div>
@@ -125,12 +123,11 @@
     </div>
 
     <script>
-        // API 키 설정 (여기에 본인의 Gemini API 키를 입력하세요)
-        const API_KEY = "AQ.Ab8RN6LnrKVwBMYH2lN2pFHuVYZJdVshNeQgaQqlaGJgqsGtGQ"; 
+        const API_KEY = "AQ.Ab8RN6LnrKVwBMYH2lN2pFHuVYZJdVshNeQgaQqlaGJgqsGtGQ"; // 본인의 API 키 입력
 
         let recognition;
         let finalTranscript = '';
-        let startTime = 0; // 녹음 시작 시간 기록용
+        let startTime = 0;
         
         const startBtn = document.getElementById('startBtn');
         const stopBtn = document.getElementById('stopBtn');
@@ -139,7 +136,6 @@
         const resultArea = document.getElementById('result-area');
         const feedbackDiv = document.getElementById('feedback');
 
-        // 웹 음성 인식(STT) 초기화
         if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             recognition = new SpeechRecognition();
@@ -174,7 +170,7 @@
             feedbackDiv.innerText = '';
             resultArea.style.display = 'none';
             
-            startTime = Date.now(); // 타이머 시작
+            startTime = Date.now();
             recognition.start();
             
             startBtn.disabled = true;
@@ -186,21 +182,19 @@
             if (!recognition) return;
             recognition.stop();
             
-            const elapsedTimeSec = (Date.now() - startTime) / 1000; // 총 녹음 소요 시간 (초)
+            const elapsedTimeSec = (Date.now() - startTime) / 1000;
             startBtn.disabled = false;
             stopBtn.disabled = true;
-            statusDiv.innerText = "AI가 발표 내용 및 속도를 분석 중입니다...";
+            statusDiv.innerText = "AI가 발표 내용 및 표현을 분석 중입니다...";
             
             if (!finalTranscript.trim()) {
                 statusDiv.innerText = "인식된 음성이 없습니다. 다시 시도해 주세요.";
                 return;
             }
 
-            // 글자 수 계산 (공백 제외 한글/영문 글자 수 기반 음절 추정)
             const cleanText = finalTranscript.replace(/\s+/g, '');
             const characterCount = cleanText.length;
             
-            // 분당 음절 수(SPM) 계산 공식: (총 글자 수 / 소요 시간(초)) * 60
             let spm = 0;
             if (elapsedTimeSec > 0) {
                 spm = Math.round((characterCount / elapsedTimeSec) * 60);
@@ -214,29 +208,32 @@
             stopBtn.disabled = true;
         }
 
-        // Gemini API 호출 및 발화 속도(200~250 기준) 반영 프롬프트
         async function evaluateWithGemini(transcript, spm, durationSec) {
             feedbackDiv.innerHTML = '<div class="loading">평가 리포트를 생성하는 중입니다...</div>';
             resultArea.style.display = 'block';
 
             const systemInstruction = `
 당신은 한국어 학술 발표(미디어·문화 전공) 평가 전문 AI 조교입니다.
-학생의 발표 텍스트와 발화 속도 데이터를 분석하여 아래 기준에 따라 피드백을 제공해주세요.
+학생의 발표 텍스트와 발화 데이터를 분석하여 아래 기준에 따라 건설적인 피드백과 가점을 부여해주세요.
 
-[평가 기준]
-1. 발화 속도 (매우 중요):
-   - 학술 발표의 가장 이상적인 속도는 '분당 200~250음절(SPM)'입니다.
-   - 학생의 실제 측정 속도가 분당 ${spm}음절 (총 발표 시간 약 ${durationSec}초)으로 나타났습니다.
-   - 이 속도가 200~250 범위 내에 있는지 평가하고, 너무 빠르거나 느린 경우 학술 발표 톤에 맞추어 조언해주세요.
-2. 수치 데이터 정확도: 발표에 포함된 통계 수치나 데이터가 정확하게 제시되었는지 평가합니다.
-3. 담화 표지 활용: 교재에서 학습한 학술적 담화 표지('본격적인 발표에 앞서', '이처럼', '요약하자면' 등) 활용 여부를 평가하고 가점을 부여합니다.
-4. 군말 및 유창성: '어', '음', '그니까' 같은 습관성 군말을 점검하고 피드백합니다.
-5. 발음 유의사항: ‘한국언론진흥재단’을 ‘한국 언론 진흥 재단’으로 발음하는 등의 띄어쓰기 차이는 관대하게 넘어가되, 유학생들의 예사소리 거센소리화('폰격적인' 등)나 의미 전달에 치명적인 오류만 부드럽게 교정 제안을 줍니다.
+[평가 및 가점 기준]
+1. 발화 속도:
+   - 이상적인 학술 발표 속도는 '분당 200~250음절(SPM)'입니다.
+   - 학생의 실제 측정 속도는 분당 ${spm}음절 (총 발표 시간 약 ${durationSec}초)입니다. 속도의 적절성을 평가해주세요.
+2. 수업 핵심 표현 및 담화 표지 활용 (가점 부여 요소):
+   - 교재에서 학습한 다음 필수 표현들이 발표에 자연스럽게 녹아들었는지 확인하고, 사용된 경우 적극적으로 칭찬하고 **가점**을 부여해주세요.
+     * [발표 주제 소개 / 개요 제시]: "제 발표 주제는~", "오늘 발표할 내용은 먼저~" 등
+     * [자료 출처 밝히기]: "~에 따르면[의하면]~", "~에서 ~을 대상으로 조사한 결과~" 등
+     * [자료 분석 및 의견 정리]: "~을 차지하다", "~에 이르다", "먼저 ~다는 의견이 있다. 반면에~" 등
+     * [비교 및 대조]: "~와 마찬가지로", "~과 달리", "~는 반면에" 등
+     * [다음 항목 전환 및 결론]: "다음으로 ~을 살펴보겠습니다", "지금까지 말씀드린 것을 통해 ~다는 결론을 내릴 수 있습니다" 등
+3. 수치 데이터 및 논리성: 통계 수치나 데이터가 정확히 제시되고 논리적으로 다뤄졌는지 평가합니다.
+4. 군말 및 유창성: '어', '음', '그니까' 같은 군말을 점검하되, 유학생들의 미세한 발음 오류(예: 예사소리의 거센소리화 등)나 띄어쓰기 차이는 관대하게 넘어가고 부드럽게 교정 제안을 주세요.
 
 출력 형식은 마크다운을 사용하여 가독성 좋게 작성해주세요.
 `;
 
-            const prompt = `다음은 학생의 발표 음성 데이터입니다. 평가를 진행해주세요:\n\n- 변환된 텍스트: "${transcript}"\n- 총 발표 시간: ${durationSec}초\n- 계산된 발화 속도: 분당 ${spm}음절 (SPM)`;
+            const prompt = `다음은 학생의 발표 음성 데이터입니다. 평가를 진행해주세요:\n\n- 변환된 텍스트: "${transcript}"\n- 총 발표 시간: ${durationSec}초\n- 발화 속도: 분당 ${spm}음절 (SPM)`;
 
             try {
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
@@ -265,7 +262,6 @@
             }
         }
 
-        // PDF 다운로드 함수
         function downloadPDF() {
             const element = document.getElementById('result-area');
             const pdfBtn = document.getElementById('pdfBtn');
