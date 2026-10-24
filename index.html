@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>학술 발표 연습기 - Academic Speech Coach</title>
     
-    <!-- Favicon 404 에러 방지 -->
-    <link rel="icon" href="data:,">
+    <!-- Favicon 404 에러 방지 (지시사항 반영) -->
+    <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
     
     <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -34,6 +34,7 @@
             --gray-700: #334155;
             --gray-800: #1e293b;
             --white: #ffffff;
+            --radius-md: 0.5rem;
             --radius-lg: 0.75rem;
             --radius-xl: 1rem;
             --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
@@ -49,34 +50,34 @@
         
         /* Layout */
         .header { background-color: var(--white); box-shadow: var(--shadow-sm); z-index: 10; flex-shrink: 0; }
-        .header-content { max-w: 1200px; margin: 0 auto; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+        .header-content { max-width: 1400px; margin: 0 auto; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
         .header-title-group { display: flex; align-items: center; gap: 0.75rem; }
         .header-icon { background-color: var(--primary); color: var(--white); padding: 0.5rem 0.6rem; border-radius: 0.5rem; font-size: 1.25rem; }
         .header-title { font-size: 1.25rem; font-weight: 700; color: var(--gray-800); line-height: 1.2; }
         .header-subtitle { font-size: 0.75rem; color: var(--gray-500); }
         .header-controls { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
         
-        .api-input-group { display: flex; align-items: center; gap: 0.5rem; background: var(--gray-100); padding: 0.25rem 0.5rem; border-radius: 0.5rem; border: 1px solid var(--gray-200); }
+        .api-input-group { display: flex; align-items: center; gap: 0.5rem; background: var(--gray-100); padding: 0.4rem 0.75rem; border-radius: 0.5rem; border: 1px solid var(--gray-200); }
         .api-input-group i { color: var(--gray-500); font-size: 0.875rem; }
-        .api-input-group input { background: transparent; border: none; outline: none; padding: 0.25rem; font-size: 0.875rem; width: 180px; color: var(--gray-700); }
+        .api-input-group input { background: transparent; border: none; outline: none; padding: 0.25rem; font-size: 0.875rem; width: 220px; color: var(--gray-700); }
         
         .main-container { flex: 1; overflow-y: auto; padding: 1.5rem; }
-        .grid-layout { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr; gap: 1.5rem; min-height: 100%; }
+        
+        /* 🔥 CRITICAL LAYOUT CHANGE: Left column smaller (3fr), Right column larger (7fr) */
+        .grid-layout { max-width: 1400px; margin: 0 auto; display: grid; grid-template-columns: 1fr; gap: 1.5rem; min-height: 100%; }
         @media (min-width: 1024px) {
-            .grid-layout { grid-template-columns: 7fr 5fr; }
+            .grid-layout { grid-template-columns: 3fr 7fr; }
         }
 
-        .column { display: flex; flex-direction: column; gap: 1.5rem; }
+        .column { display: flex; flex-direction: column; gap: 1rem; }
 
         /* Components */
-        .card { background-color: var(--white); border-radius: var(--radius-xl); box-shadow: var(--shadow-sm); border: 1px solid var(--gray-100); padding: 1.5rem; }
-        .card-header { padding: 1rem 1.5rem; border-bottom: 1px solid var(--gray-100); background-color: var(--gray-50); border-radius: var(--radius-xl) var(--radius-xl) 0 0; display: flex; justify-content: space-between; align-items: center; margin: -1.5rem -1.5rem 1.5rem -1.5rem; }
-        .card-header h2 { font-size: 1rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; }
+        .card { background-color: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); border: 1px solid var(--gray-200); padding: 1.25rem; }
+        .card-header { padding: 0.75rem 1.25rem; border-bottom: 1px solid var(--gray-100); background-color: var(--gray-50); border-radius: var(--radius-lg) var(--radius-lg) 0 0; display: flex; justify-content: space-between; align-items: center; margin: -1.25rem -1.25rem 1rem -1.25rem; }
+        .card-header h2 { font-size: 0.95rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; color: var(--gray-700); }
         
-        .card-body-scroll { flex: 1; overflow-y: auto; position: relative; min-height: 250px; }
-
         .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 500; transition: all 0.2s; font-size: 0.875rem; }
-        .btn-lg { padding: 0.75rem 1.5rem; font-size: 1rem; border-radius: var(--radius-lg); font-weight: 600; }
+        .btn-lg { padding: 0.6rem 1.25rem; font-size: 1rem; border-radius: var(--radius-md); font-weight: 600; width: 100%; }
         .btn-primary { background-color: var(--primary); color: var(--white); }
         .btn-primary:hover { background-color: var(--primary-hover); }
         .btn-danger { background-color: var(--danger); color: var(--white); }
@@ -85,74 +86,70 @@
         .btn-dark:hover { background-color: #0f172a; }
         .hidden { display: none !important; }
 
-        /* Specific Elements */
-        .controls-row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; }
-        .status-indicator { display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; font-weight: 500; color: var(--gray-500); }
+        /* Specific Elements (Compact Left Side) */
+        .controls-row { display: flex; flex-direction: column; gap: 0.75rem; }
+        .status-indicator { display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-size: 0.875rem; font-weight: 500; color: var(--gray-500); padding: 0.5rem; background: var(--gray-50); border-radius: var(--radius-md); }
         .status-dot { width: 10px; height: 10px; border-radius: 50%; background-color: var(--gray-300); }
         .status-dot.recording { background-color: var(--danger); animation: pulse-ring 1.25s cubic-bezier(0.215, 0.61, 0.355, 1) infinite; }
         .status-text.recording { color: var(--danger); }
 
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-        .stat-card { display: flex; align-items: center; gap: 1rem; padding: 1.25rem; }
-        .stat-icon { width: 3rem; height: 3rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+        .stat-card { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.25rem; padding: 1rem 0.5rem; text-align: center; }
+        .stat-icon { width: 2.25rem; height: 2.25rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1rem; margin-bottom: 0.25rem; }
         .stat-icon.time { background-color: #e0e7ff; color: #4f46e5; }
         .stat-icon.speed { background-color: #d1fae5; color: #059669; }
-        .stat-label { font-size: 0.875rem; color: var(--gray-500); font-weight: 500; }
-        .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--gray-800); }
-        .stat-unit { font-size: 0.875rem; font-weight: 400; color: var(--gray-500); }
+        .stat-label { font-size: 0.75rem; color: var(--gray-500); font-weight: 600; }
+        .stat-value { font-size: 1.25rem; font-weight: 700; color: var(--gray-800); line-height: 1.2; }
+        .stat-unit { font-size: 0.7rem; font-weight: 400; color: var(--gray-500); display: block; }
 
-        .transcript-container { display: flex; flex-direction: column; height: 100%; min-height: 350px; }
-        #transcriptText { color: var(--gray-700); white-space: pre-wrap; margin-bottom: 0.5rem; }
+        /* COMPACT Transcript Container */
+        .transcript-container { display: flex; flex-direction: column; flex: none; height: 180px; }
+        .transcript-body { overflow-y: auto; flex: 1; font-size: 0.85rem; padding-right: 0.5rem; }
+        #transcriptText { color: var(--gray-700); white-space: pre-wrap; }
         #interimText { color: var(--gray-400); font-style: italic; }
 
-        .feedback-container { display: flex; flex-direction: column; height: 100%; min-height: 500px; position: relative; }
-        .placeholder-box { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--gray-400); text-align: center; gap: 1rem; min-height: 300px; }
-        .placeholder-box i { font-size: 3rem; color: var(--gray-200); }
+        /* LARGE Feedback Container */
+        .feedback-container { display: flex; flex-direction: column; height: 100%; min-height: 700px; position: relative; border: 2px solid var(--primary); box-shadow: var(--shadow-md); }
+        .feedback-container .card-header h2 { font-size: 1.1rem; color: var(--primary); }
+        .placeholder-box { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--gray-400); text-align: center; gap: 1rem; min-height: 400px; }
+        .placeholder-box i { font-size: 4rem; color: var(--gray-200); margin-bottom: 1rem; }
+        .feedback-scroll-area { overflow-y: auto; flex: 1; padding-right: 0.5rem; }
         
-        .audio-player-wrapper { margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--gray-100); }
-        .audio-player-wrapper p { font-size: 0.875rem; font-weight: 600; color: var(--gray-700); margin-bottom: 0.5rem; }
-        audio { width: 100%; height: 40px; border-radius: 0.5rem; outline: none; }
+        .audio-player-wrapper { margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--gray-100); }
+        .audio-player-wrapper p { font-size: 0.75rem; font-weight: 600; color: var(--gray-500); margin-bottom: 0.25rem; }
+        audio { width: 100%; height: 32px; border-radius: 0.25rem; outline: none; }
 
         /* Loading Overlay */
-        .loading-overlay { position: absolute; inset: 0; background-color: rgba(255, 255, 255, 0.9); backdrop-filter: blur(4px); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; border-radius: 0 0 var(--radius-xl) var(--radius-xl); }
-        .loading-spinner { font-size: 2.5rem; color: #9333ea; margin-bottom: 1rem; animation: spin 1s linear infinite; }
-        .loading-title { font-weight: 600; color: var(--gray-800); }
-        .loading-subtitle { font-size: 0.875rem; color: var(--gray-500); margin-top: 0.25rem; }
+        .loading-overlay { position: absolute; inset: 0; background-color: rgba(255, 255, 255, 0.95); backdrop-filter: blur(4px); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; border-radius: 0 0 var(--radius-lg) var(--radius-lg); }
+        .loading-spinner { font-size: 3rem; color: var(--primary); margin-bottom: 1rem; animation: spin 1s linear infinite; }
+        .loading-title { font-size: 1.1rem; font-weight: 700; color: var(--gray-800); }
+        .loading-subtitle { font-size: 0.9rem; color: var(--gray-500); margin-top: 0.5rem; }
 
-        /* Markdown Styles */
-        .markdown-body { padding-right: 0.5rem; }
-        .markdown-body h1, .markdown-body h2, .markdown-body h3 { font-weight: 600; color: var(--gray-800); margin-top: 1.5rem; margin-bottom: 0.75rem; }
-        .markdown-body h3 { font-size: 1.125rem; }
-        .markdown-body p { margin-bottom: 1rem; }
-        .markdown-body ul { margin-left: 1.5rem; margin-bottom: 1rem; }
-        .markdown-body li { margin-bottom: 0.25rem; }
-        .markdown-body strong { color: var(--primary); font-weight: 600; }
-        .markdown-body blockquote { border-left: 4px solid var(--gray-300); padding-left: 1rem; color: var(--gray-500); margin-bottom: 1rem; }
-        
         /* Toast Notifications */
-        #toast-container { position: fixed; top: 1rem; left: 50%; transform: translateX(-50%); z-index: 100; display: flex; flex-direction: column; gap: 0.5rem; }
+        #toast-container { position: fixed; top: 1.5rem; left: 50%; transform: translateX(-50%); z-index: 100; display: flex; flex-direction: column; gap: 0.5rem; }
         .toast { padding: 0.75rem 1.5rem; border-radius: 2rem; color: white; font-weight: 500; font-size: 0.875rem; opacity: 0; transition: opacity 0.3s, transform 0.3s; transform: translateY(-20px); box-shadow: var(--shadow-md); }
         .toast.show { opacity: 1; transform: translateY(0); }
         .toast.error { background-color: var(--danger); }
         .toast.success { background-color: var(--success); }
         .toast.info { background-color: var(--primary); }
 
-        /* Score & Feedback UI */
-        .score-container { display: flex; flex-direction: column; align-items: center; margin-bottom: 2rem; }
-        .score-circle { width: 120px; height: 120px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: 800; color: var(--primary); background: conic-gradient(var(--primary) 0%, var(--gray-100) 0%); position: relative; box-shadow: var(--shadow-sm); }
-        .score-circle::after { content: ''; position: absolute; inset: 10px; background: var(--white); border-radius: 50%; z-index: 1; }
+        /* Score & Feedback UI Styling for LARGE layout */
+        .score-header-box { display: flex; flex-direction: column; align-items: center; background: linear-gradient(135deg, var(--gray-50), var(--gray-100)); padding: 2rem; border-radius: var(--radius-md); border: 1px solid var(--gray-200); margin-bottom: 1.5rem; }
+        .score-circle { width: 140px; height: 140px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 3rem; font-weight: 800; color: var(--primary); background: conic-gradient(var(--primary) 0%, var(--gray-200) 0%); position: relative; box-shadow: var(--shadow-sm); }
+        .score-circle::after { content: ''; position: absolute; inset: 12px; background: var(--gray-50); border-radius: 50%; z-index: 1; }
         .score-value { position: relative; z-index: 2; display: flex; align-items: baseline; gap: 0.2rem; }
-        .score-value span { font-size: 1rem; color: var(--gray-500); font-weight: 500; }
+        .score-value span { font-size: 1.2rem; color: var(--gray-500); font-weight: 600; }
         
-        .feedback-section { margin-bottom: 1.5rem; }
-        .feedback-section h3 { font-size: 1.1rem; color: var(--gray-800); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--gray-100); }
+        .feedback-grid { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
+        .feedback-section { background: var(--white); border: 1px solid var(--gray-100); border-radius: var(--radius-md); padding: 1.25rem; box-shadow: var(--shadow-sm); }
+        .feedback-section h3 { font-size: 1.05rem; color: var(--gray-800); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; border-bottom: 2px solid var(--gray-100); padding-bottom: 0.5rem; }
         
-        .tag-list { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-        .tag { padding: 0.35rem 0.75rem; border-radius: 2rem; font-size: 0.85rem; font-weight: 500; line-height: 1.2; box-shadow: var(--shadow-sm); }
+        .tag-list { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+        .tag { padding: 0.4rem 0.85rem; border-radius: 2rem; font-size: 0.875rem; font-weight: 600; line-height: 1.3; box-shadow: var(--shadow-sm); }
         .tag.used { background-color: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
-        .tag.recommended { background-color: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+        .tag.missed { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
         
-        .feedback-text { background-color: var(--gray-50); padding: 1rem; border-radius: var(--radius-lg); color: var(--gray-700); font-size: 0.95rem; line-height: 1.6; border: 1px solid var(--gray-200); }
+        .feedback-text { background-color: #f8fafc; padding: 1.25rem; border-radius: var(--radius-md); color: var(--gray-700); font-size: 0.95rem; line-height: 1.7; border-left: 4px solid var(--primary); }
 
         /* Animations */
         @keyframes pulse-ring {
@@ -165,9 +162,9 @@
         /* PDF Export Adjustments */
         .pdf-mode { height: auto !important; overflow: visible !important; background: white; }
         .pdf-mode .grid-layout { display: block; }
-        .pdf-mode .column { display: block; }
-        .pdf-mode .card { box-shadow: none; border: 1px solid #ccc; margin-bottom: 2rem; page-break-inside: avoid; }
-        .pdf-mode .card-body-scroll { min-height: auto; overflow: visible; }
+        .pdf-mode .column { display: block; margin-bottom: 2rem; }
+        .pdf-mode .card { box-shadow: none; border: 1px solid #ccc; margin-bottom: 1.5rem; page-break-inside: avoid; }
+        .pdf-mode .transcript-body, .pdf-mode .feedback-scroll-area { overflow: visible !important; height: auto !important; max-height: none !important; }
     </style>
 </head>
 <body>
@@ -180,22 +177,20 @@
         <div class="header-content">
             <div class="header-title-group">
                 <div class="header-icon">
-                    <i class="fa-solid fa-microphone-lines"></i>
+                    <i class="fa-solid fa-graduation-cap"></i>
                 </div>
                 <div>
                     <h1 class="header-title">학술 발표 연습기</h1>
-                    <p class="header-subtitle">실시간 STT 및 AI 피드백 시스템 (Vanilla CSS)</p>
+                    <p class="header-subtitle">실시간 STT 및 AI 피드백 대시보드</p>
                 </div>
             </div>
             <div class="header-controls">
-                <!-- API Key Input -->
-                <div class="api-input-group" title="자신의 Gemini API Key가 있다면 입력하세요. 없으면 기본 시스템 환경을 사용합니다.">
+                <div class="api-input-group" title="자신의 Gemini API Key를 입력하세요.">
                     <i class="fa-solid fa-key"></i>
-                    <input type="password" id="apiKeyInput" placeholder="Gemini API Key (선택사항)">
+                    <input type="password" id="apiKeyInput" placeholder="Gemini API Key 필수 입력">
                 </div>
-                <!-- PDF Button -->
                 <button id="btnPdf" class="btn btn-dark hidden">
-                    <i class="fa-solid fa-file-pdf"></i> PDF 저장
+                    <i class="fa-solid fa-file-pdf"></i> 결과 PDF 저장
                 </button>
             </div>
         </div>
@@ -205,85 +200,79 @@
     <main class="main-container" id="report-container">
         <div class="grid-layout">
             
-            <!-- Left Column: Controls & Transcript -->
+            <!-- Left Column: SMALL & COMPACT -->
             <div class="column">
                 
                 <!-- Controls Card -->
                 <div class="card">
                     <div class="controls-row">
-                        <div>
-                            <button id="btnStart" class="btn btn-primary btn-lg">
-                                <i class="fa-solid fa-play"></i> 발표 시작
-                            </button>
-                            <button id="btnStop" class="btn btn-danger btn-lg hidden">
-                                <i class="fa-solid fa-stop"></i> 발표 종료
-                            </button>
-                        </div>
+                        <button id="btnStart" class="btn btn-primary btn-lg">
+                            <i class="fa-solid fa-microphone"></i> 발표 시작
+                        </button>
+                        <button id="btnStop" class="btn btn-danger btn-lg hidden">
+                            <i class="fa-solid fa-stop"></i> 발표 종료 및 평가
+                        </button>
                         
-                        <!-- Status Indicator -->
                         <div class="status-indicator">
                             <span class="status-dot" id="statusDot"></span>
                             <span id="statusText">대기 중</span>
                         </div>
                     </div>
 
-                    <!-- Audio Player (Hidden initially) -->
                     <div id="audioPlayerContainer" class="audio-player-wrapper hidden">
-                        <p>다시 듣기</p>
+                        <p>녹음 다시 듣기</p>
                         <audio id="audioPlayback" controls></audio>
                     </div>
                 </div>
 
                 <!-- Stats Cards -->
                 <div class="stats-grid">
-                    <div class="card stat-card" style="padding: 1.25rem;">
+                    <div class="card stat-card">
                         <div class="stat-icon time"><i class="fa-regular fa-clock"></i></div>
-                        <div>
-                            <div class="stat-label">발표 시간</div>
-                            <div class="stat-value" id="statTime">00:00</div>
-                        </div>
+                        <div class="stat-label">발표 시간</div>
+                        <div class="stat-value" id="statTime">00:00</div>
                     </div>
-                    <div class="card stat-card" style="padding: 1.25rem;">
+                    <div class="card stat-card">
                         <div class="stat-icon speed"><i class="fa-solid fa-gauge-high"></i></div>
-                        <div>
-                            <div class="stat-label">발표 속도</div>
-                            <div class="stat-value" id="statSpeed">0 <span class="stat-unit">자/분 (CPM)</span></div>
-                        </div>
+                        <div class="stat-label">발표 속도</div>
+                        <div class="stat-value" id="statSpeed">0 <span class="stat-unit">음절/분 (CPM)</span></div>
                     </div>
                 </div>
 
-                <!-- Transcript Card -->
+                <!-- COMPACT Transcript Card -->
                 <div class="card transcript-container">
                     <div class="card-header">
-                        <h2><i class="fa-solid fa-align-left" style="color: var(--gray-400);"></i> 실시간 스크립트</h2>
+                        <h2><i class="fa-solid fa-align-left" style="color: var(--gray-500);"></i> 실시간 스크립트</h2>
                     </div>
-                    <div class="card-body-scroll">
-                        <div id="transcriptText">발표를 시작하면 스크립트가 여기에 작성됩니다...</div>
+                    <div class="transcript-body">
+                        <div id="transcriptText">발표를 시작하면 내용이 기록됩니다...</div>
                         <div id="interimText"></div>
                     </div>
                 </div>
 
             </div>
 
-            <!-- Right Column: AI Feedback -->
+            <!-- Right Column: LARGE & FOCAL POINT -->
             <div class="column">
                 <div class="card feedback-container">
                     <div class="card-header">
-                        <h2><i class="fa-solid fa-wand-magic-sparkles" style="color: #a855f7;"></i> AI 학술 평가 (Gemini)</h2>
+                        <h2><i class="fa-solid fa-wand-magic-sparkles" style="color: var(--primary);"></i> AI 학술 담화 평가 보고서 (Gemini 1.5 Flash)</h2>
                     </div>
                     
-                    <div class="card-body-scroll markdown-body" id="aiFeedbackContainer">
+                    <div class="feedback-scroll-area" id="aiFeedbackContainer">
                         <div class="placeholder-box">
-                            <i class="fa-solid fa-microscope"></i>
-                            <p>발표가 종료되면 AI가 스크립트를 분석하여<br>담화 표지와 학술적 표현을 평가합니다.</p>
+                            <i class="fa-solid fa-chart-pie"></i>
+                            <p style="font-size: 1.1rem; color: var(--gray-600); font-weight: 500;">
+                                발표를 종료하면 AI가 스크립트를 분석하여<br>15가지 학술 담화 표지 사용 여부와 피드백을 제공합니다.
+                            </p>
                         </div>
                     </div>
 
                     <!-- Loading Overlay -->
                     <div id="loadingOverlay" class="loading-overlay hidden">
                         <i class="fa-solid fa-circle-notch loading-spinner"></i>
-                        <div class="loading-title">Gemini가 발표를 분석 중입니다...</div>
-                        <div class="loading-subtitle">담화 표지 및 학술적 표현 검토 중</div>
+                        <div class="loading-title">AI가 발표 내용을 꼼꼼하게 분석 중입니다...</div>
+                        <div class="loading-subtitle">가산점 계산 및 맞춤형 피드백 생성 중</div>
                     </div>
                 </div>
             </div>
@@ -332,10 +321,8 @@
             toast.textContent = message;
             container.appendChild(toast);
             
-            // Animate in
             setTimeout(() => toast.classList.add('show'), 10);
             
-            // Remove after 3s
             setTimeout(() => {
                 toast.classList.remove('show');
                 setTimeout(() => toast.remove(), 300);
@@ -353,7 +340,7 @@
             const rec = new SpeechRecognition();
             rec.continuous = true;
             rec.interimResults = true;
-            rec.lang = 'ko-KR'; // 한국어 설정
+            rec.lang = 'ko-KR'; // 한국어
 
             rec.onresult = (event) => {
                 let interim = '';
@@ -367,20 +354,23 @@
                 }
                 interimText.textContent = interim;
                 updateStats();
+                
+                // 스크롤 맨 아래로 유지
+                const tb = document.querySelector('.transcript-body');
+                tb.scrollTop = tb.scrollHeight;
             };
 
             rec.onerror = (event) => {
-                console.error("Speech recognition error:", event.error);
                 if (event.error === 'not-allowed') {
-                    showToast("마이크 권한이 거부되었습니다. 브라우저 설정을 확인하세요.", "error");
+                    showToast("마이크 권한이 거부되었습니다.", "error");
                     stopRecordingProcess(true);
                 }
             };
 
+            // 무음으로 인해 끊길 경우 자동 재시작 로직
             rec.onend = () => {
-                // 무음 등으로 인해 자동 종료된 경우, 녹음 상태면 재시작하여 STT가 끊기지 않도록 함
                 if (isRecording) {
-                    try { rec.start(); } catch(e) { console.error("Failed to restart recognition", e); }
+                    try { rec.start(); } catch(e) { console.debug("STT Restarting..."); }
                 }
             };
 
@@ -400,22 +390,20 @@
             const elapsedSeconds = Math.floor((now - startTime) / 1000);
             statTime.textContent = formatTime(elapsedSeconds);
 
-            // CPM (Characters per Minute) 계산 - 공백 제외 글자 수
+            // CPM (Characters per Minute)
             const charCount = finalTranscript.replace(/\s/g, '').length;
             let cpm = 0;
             if (elapsedSeconds > 0) {
                 cpm = Math.floor((charCount / elapsedSeconds) * 60);
             }
-            statSpeed.innerHTML = `${cpm} <span class="stat-unit">자/분 (CPM)</span>`;
+            statSpeed.innerHTML = `${cpm} <span class="stat-unit">음절/분 (CPM)</span>`;
         }
 
         // --- Start Recording ---
         btnStart.addEventListener('click', async () => {
             try {
-                // 1. Request Microphone Permission
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 
-                // 2. Initialize MediaRecorder
                 audioChunks = [];
                 mediaRecorder = new MediaRecorder(stream);
                 
@@ -428,29 +416,33 @@
                     const audioUrl = URL.createObjectURL(audioBlob);
                     audioPlayback.src = audioUrl;
                     audioPlayerContainer.classList.remove('hidden');
-                    
-                    // Stop tracks to release mic
                     stream.getTracks().forEach(track => track.stop());
                 };
 
-                // 3. Initialize Speech Recognition
                 finalTranscript = '';
                 transcriptText.textContent = '';
                 interimText.textContent = '';
-                aiFeedbackContainer.innerHTML = ''; 
+                
+                // 평가 초기화
+                aiFeedbackContainer.innerHTML = `
+                    <div class="placeholder-box">
+                        <i class="fa-solid fa-microphone-lines" style="color: var(--primary);"></i>
+                        <p style="font-size: 1.1rem; color: var(--gray-600); font-weight: 500;">
+                            발표를 듣고 있습니다...<br>편안하게 학술 발표를 진행해 주세요.
+                        </p>
+                    </div>
+                `;
                 btnPdf.classList.add('hidden');
                 
                 recognition = setupSpeechRecognition();
                 if (!recognition) return;
 
-                // 4. Start operations
                 mediaRecorder.start();
                 recognition.start();
                 
                 isRecording = true;
                 startTime = new Date();
                 
-                // 5. Update UI
                 btnStart.classList.add('hidden');
                 btnStop.classList.remove('hidden');
                 statusDot.classList.add('recording');
@@ -458,12 +450,11 @@
                 statusText.textContent = '녹음 및 인식 중...';
                 audioPlayerContainer.classList.add('hidden');
                 
-                // Start Timer
                 timerInterval = setInterval(updateStats, 1000);
                 showToast("발표 연습을 시작합니다.", "success");
 
             } catch (err) {
-                console.error("Mic access denied:", err);
+                console.error("Mic error:", err);
                 showToast("마이크 접근 권한이 필요합니다.", "error");
             }
         });
@@ -475,14 +466,9 @@
 
             clearInterval(timerInterval);
 
-            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-                mediaRecorder.stop();
-            }
-            if (recognition) {
-                recognition.stop();
-            }
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+            if (recognition) recognition.stop();
 
-            // Update UI
             btnStop.classList.add('hidden');
             btnStart.classList.remove('hidden');
             btnStart.innerHTML = '<i class="fa-solid fa-rotate-right"></i> 다시 연습하기';
@@ -491,66 +477,68 @@
             statusText.textContent = '종료됨';
             interimText.textContent = '';
 
-            if (!isError && finalTranscript.trim().length > 0) {
+            if (!isError && finalTranscript.trim().length > 10) {
                 analyzeWithGemini(finalTranscript);
             } else if (!isError) {
-                showToast("녹음된 음성이 없거나 스크립트가 짧습니다.", "info");
-                aiFeedbackContainer.innerHTML = '<div class="placeholder-box"><p>스크립트가 부족하여 분석을 건너뛰었습니다.</p></div>';
+                showToast("스크립트가 너무 짧아 평가할 수 없습니다.", "error");
+                aiFeedbackContainer.innerHTML = '<div class="placeholder-box"><i class="fa-solid fa-triangle-exclamation"></i><p>스크립트 내용이 부족하여 분석을 건너뛰었습니다.</p></div>';
             }
         }
 
         btnStop.addEventListener('click', () => stopRecordingProcess(false));
 
-        // --- Gemini API Integration ---
+        // --- Gemini API (gemini-1.5-flash) Integration ---
         async function analyzeWithGemini(scriptText) {
+            const apiKey = apiKeyInput.value.trim();
+            if (!apiKey) {
+                showToast("Gemini API Key를 상단에 입력해 주세요.", "error");
+                return;
+            }
+
             loadingOverlay.classList.remove('hidden');
             
-            // User API Key handling. If empty, platform default is used if applicable.
-            const userKey = apiKeyInput.value.trim();
-            const apiKey = userKey || "AQ.Ab8RN6LnrKVwBMYH2lN2pFHuVYZJdVshNeQgaQqlaGJgqsGtGQ"; 
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+            // 지시사항: gemini-1.5-flash 사용
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
             const systemPrompt = `
-당신은 대학 및 대학원 수준의 '한국어 학술 발표(Academic Presentation)'를 지도하는 전문 코치입니다.
-사용자의 발표 스크립트가 주어지면, 학습자가 목표로 하는 '학술 담화 표지 및 표현'을 얼마나 잘 활용했는지 분석하여 평가하세요.
+당신은 한국어 학술 발표(Academic Presentation)를 지도하는 전문 코치입니다.
+학습자의 발표 스크립트를 분석하여 15가지 '학술 담화 표지 및 표현' 사용 여부를 확인하고 평가하세요.
 
-[평가 기준 및 점수 산정]
-- 기본 내용의 논리성과 흐름을 바탕으로 기본 점수(60~70점)를 부여합니다.
-- 아래 [학습 대상 표지 및 표현 목록]에 있는 표현을 적절하게 사용할 때마다 가산점을 부여하여 총 100점 만점으로 환산하세요.
+[평가 기준]
+- 기본 점수: 내용 전개와 논리성을 바탕으로 60~70점 부여
+- 가산점: 아래 15개 항목 중 사용된 표현이 있을 때마다 가산점을 부여하여 총 100점 만점으로 환산
 
-[학습 대상 표지 및 표현 목록]
-1) 발표 주제 소개하기: 제 발표 주제는 ~입니다, 저는 여러분께 ~에 대해 말씀드리려고 합니다, 제가 이 주제를 선택하게 된 이유[동기]는 ~기 때문입니다
-2) 발표 개요 제시하기: 제 발표는 크게 ~부분으로 이루어졌습니다. 첫 번째는 ~, 두 번째는 ~에 대한 것입니다, 오늘 발표할 내용은 먼저 ~, 다음으로 ~, 마지막으로 ~의 순서로 구성되어 있습니다
-3) 자료 출처 밝히기: ~(자료)에 따르면[의하면] ~(이)라고 한다, ~에서 ~을 대상으로 조사한 결과 ~는 것으로 나타났다
-4) 자료 분석하기: ~을 차지하다, ~에 이르다[그치다, 머무르다], (~에 이어) ~으로 나타났다, ~으로 인해 ~은 것을 알 수 있다[~을 것으로 예상되다]
-5) 다음 항목으로 넘어가기: 다음으로[그러면, 이번에는] ~을 살펴보겠습니다, 우선[먼저, 마지막으로] ~에 대해 말씀드리겠습니다
-6) 자료 제시하기: 먼저 이 그림[사진, 도표, 그래프]을 봐 주십시오, 이 그림은 ~을 보여줍니다, 이 그림은 ~에 대한 것입니다
+[15가지 학술 담화 표지 목록]
+1) 주제 소개: 제 발표 주제는 ~입니다, 저는 ~에 대해 말씀드리려고 합니다, 이 주제를 선택하게 된 이유[동기]는 ~기 때문입니다
+2) 개요 제시: 제 발표는 크게 ~부분으로 이루어졌습니다, 먼저 ~, 다음으로 ~, 마지막으로 ~의 순서로 구성되어 있습니다
+3) 출처 밝히기: ~(자료)에 따르면[의하면] ~(이)라고 한다, ~에서 조사한 결과 ~는 것으로 나타났다
+4) 자료 분석: ~을 차지하다, ~에 이르다[그치다, 머무르다], (~에 이어) ~으로 나타났다, ~으로 인해 ~은 것을 알 수 있다[예상되다]
+5) 다음 항목: 다음으로[그러면, 이번에는] ~을 살펴보겠습니다, 우선[먼저, 마지막으로] ~에 대해 말씀드리겠습니다
+6) 자료 제시: 먼저 이 그림[사진, 도표, 그래프]을 봐 주십시오, 이 그림은 ~을 보여줍니다, 이 그림은 ~에 대한 것입니다
 7) 평가하기: ~다는 평가를 받다, ~다는 점에서 의의[가치]가 있다, ~다는 점에서 문제가 있다[되다]
 8) 정의하기: ~란 ~를 말[의미, 뜻]합니다, ~는/은 ~이라고 할 수 있습니다, ~는/은 일반적으로 ~으로 정의됩니다
-9) 개념의 핵심 특징 설명하기: ~의 핵심은 ~에 있습니다, ~의 가장 큰 특징은 ~입니다
-10) 비교하기: ~와 마찬가지로, ~은 ~과 다름없다, ~은 ~다는 점에서 ~과 공통점이 있다
-11) 대조하기: ~과 달리, ~는 것과 달리, ~는 반면에, ~는 ~다는 점[면]에서 ~와 차이를 보인다, ~이 ~다면, ~은 ~다
-12) 의견 소개하기: 먼저 ~의 ~다는 의견이 있다, 전문가 ~는/은 ~다고 주장[설명, 강조, 지적]합니다, ~다는 의견을 제시합니다
-13) 전문가의 의견을 나의 주장과 연결하기: 이와 같은 연구 결과는 ~을/를 뒷받침합니다, 전문가의 의견을 통해 ~을/를 알 수 있습니다, 이를 통해 ~을/를 확인할 수 있습니다
+9) 핵심 특징: ~의 핵심은 ~에 있습니다, ~의 가장 큰 특징은 ~입니다
+10) 비교: ~와 마찬가지로, ~은 ~과 다름없다, ~은 ~다는 점에서 ~과 공통점이 있다
+11) 대조: ~과 달리, ~는 것과 달리, ~는 반면에, ~는 ~다는 점[면]에서 ~와 차이를 보인다, ~이 ~다면, ~은 ~다
+12) 의견 소개: 먼저 ~의 ~다는 의견이 있다, 전문가 ~는/은 ~다고 주장[설명, 강조, 지적]합니다, ~다는 의견을 제시합니다
+13) 의견 연결: 이와 같은 연구 결과는 ~을/를 뒷받침합니다, 전문가의 의견을 통해 ~을/를 알 수 있습니다, 이를 통해 ~을/를 확인할 수 있습니다
 14) 마무리 도입: 지금까지 ~를 살펴보았습니다, 이 발표에서는 ~를 논의[검토]했는데요, 이상으로 ~에 대해서 말씀드렸습니다
-15) 결론 제시하기: 지금까지 말씀드린 것을 통해 ~다고(다는) 결론을 내릴 수 있습니다, 지금까지 발표한 내용을 종합해 본다면 ~다고 볼 수 있습니다, 따라서 ~해야 할 것입니다
+15) 결론 제시: 지금까지 말씀드린 것을 통해 ~다고(다는) 결론을 내릴 수 있습니다, 발표한 내용을 종합해 본다면 ~다고 볼 수 있습니다, 따라서 ~해야 할 것입니다
 
-반드시 다음 JSON 스키마를 준수하여 응답하세요. 마크다운 기호 없이 순수 JSON만 반환해야 합니다.
+반드시 다음 JSON 스키마를 준수하여 응답하세요. (마크다운 없이 순수 JSON만 반환)
 {
-  "score": 숫자 (0~100 사이의 정수),
-  "speedFeedback": "문자열 (발표 분량이나 흐름에 대한 짧은 코멘트)",
-  "usedExpressions": ["문자열 배열 (위 목록 중 스크립트에서 실제로 발견된 표현들을 담화 표지 단위로 정리)"],
-  "recommendedExpressions": ["문자열 배열 (위 목록 중 현재 스크립트 문맥상 추가하면 좋았을 추천 표현들)"],
-  "generalFeedback": "문자열 (학술적 글쓰기/말하기 관점의 논리적 전개 및 종합 피드백)"
+  "score": 숫자 (0~100 정수),
+  "speed_feedback": "문자열 (발표 분량/속도에 대한 코멘트)",
+  "used_expressions": ["문자열 배열 (실제로 잘 사용한 위 목록의 표현 카테고리 또는 문구)"],
+  "missed_expressions": ["문자열 배열 (문맥상 사용하면 좋았을 누락된 추천 표현 카테고리)"],
+  "overall_feedback": "문자열 (학술적 관점의 종합 논리 평가 및 격려)"
 }
 `;
 
             const payload = {
                 contents: [{ parts: [{ text: `[발표 스크립트]\n${scriptText}` }] }],
                 systemInstruction: { parts: [{ text: systemPrompt }] },
-                generationConfig: {
-                    responseMimeType: "application/json"
-                }
+                generationConfig: { responseMimeType: "application/json" }
             };
 
             try {
@@ -569,24 +557,20 @@
                 const candidate = result.candidates?.[0];
                 
                 if (candidate && candidate.content?.parts?.[0]?.text) {
-                    const jsonText = candidate.content.parts[0].text;
-                    const evalData = JSON.parse(jsonText);
-                    
-                    // Render structured UI
+                    const evalData = JSON.parse(candidate.content.parts[0].text);
                     renderFeedbackUI(evalData);
-                    
                     btnPdf.classList.remove('hidden'); 
-                    showToast("AI 분석이 완료되었습니다.", "success");
+                    showToast("AI 학술 평가가 완료되었습니다.", "success");
                 } else {
                     throw new Error("Invalid response format");
                 }
             } catch (error) {
                 console.error("Gemini API Error:", error);
                 aiFeedbackContainer.innerHTML = `
-                    <div style="background-color: var(--danger); color: white; padding: 1rem; border-radius: 0.5rem; margin-top: 1rem;">
-                        <strong>분석 중 오류가 발생했습니다.</strong><br>
-                        <small>${error.message}</small><br>
-                        <small>API Key가 올바른지 확인해 주세요.</small>
+                    <div style="background-color: var(--danger); color: white; padding: 1.5rem; border-radius: 0.5rem; margin: 2rem;">
+                        <strong><i class="fa-solid fa-triangle-exclamation"></i> 분석 중 오류가 발생했습니다.</strong><br><br>
+                        <small>${error.message}</small><br><br>
+                        <small>API Key가 정확한지 확인하고 다시 시도해 주세요.</small>
                     </div>
                 `;
                 showToast("AI 분석 요청 실패", "error");
@@ -595,43 +579,45 @@
             }
         }
 
-        // --- Render Structured JSON Feedback ---
+        // --- Render Structured JSON Feedback (LARGE UI) ---
         function renderFeedbackUI(data) {
             const score = data.score || 0;
-            // Calculate degrees for the circular progress bar (0 to 360)
             const deg = (score / 100) * 360;
             
-            const usedTags = (data.usedExpressions || []).map(expr => 
+            const usedTags = (data.used_expressions || []).map(expr => 
                 `<span class="tag used"><i class="fa-solid fa-check"></i> ${expr}</span>`
             ).join('');
             
-            const recTags = (data.recommendedExpressions || []).map(expr => 
-                `<span class="tag recommended"><i class="fa-solid fa-lightbulb"></i> ${expr}</span>`
+            const missedTags = (data.missed_expressions || []).map(expr => 
+                `<span class="tag missed"><i class="fa-solid fa-arrow-trend-up"></i> ${expr}</span>`
             ).join('');
 
             aiFeedbackContainer.innerHTML = `
-                <div class="score-container">
-                    <p style="font-weight: 600; color: var(--gray-600); margin-bottom: 1rem;">AI 학술 발표 평가 점수</p>
-                    <div class="score-circle" style="background: conic-gradient(var(--primary) ${deg}deg, var(--gray-100) 0deg);">
+                <div class="score-header-box">
+                    <p style="font-size: 1.25rem; font-weight: 700; color: var(--gray-700); margin-bottom: 1.5rem;">AI 학술 담화 평가 점수</p>
+                    <div class="score-circle" style="background: conic-gradient(var(--primary) ${deg}deg, var(--gray-200) 0deg);">
                         <div class="score-value">${score}<span>점</span></div>
                     </div>
+                    <p style="margin-top: 1rem; color: var(--gray-600); font-weight: 500;">가산점이 포함된 최종 환산 점수입니다.</p>
                 </div>
 
-                <div class="feedback-section">
-                    <h3><i class="fa-solid fa-medal" style="color: #16a34a;"></i> 획득한 가산점 (사용된 목표 표현)</h3>
-                    ${usedTags ? `<div class="tag-list">${usedTags}</div>` : `<div class="feedback-text" style="color: var(--gray-500);"><i class="fa-solid fa-circle-exclamation"></i> 발견된 목표 학술 표현이 없습니다. 다음에는 배운 표현을 활용해 보세요!</div>`}
-                </div>
+                <div class="feedback-grid">
+                    <div class="feedback-section">
+                        <h3><i class="fa-solid fa-medal" style="color: #16a34a;"></i> 획득한 가산점 (사용된 목표 표현)</h3>
+                        ${usedTags ? `<div class="tag-list">${usedTags}</div>` : `<div style="color: var(--gray-500);"><i class="fa-solid fa-circle-exclamation"></i> 발견된 목표 학술 표현이 없습니다. 다음에는 배운 표현을 적극 활용해 보세요!</div>`}
+                    </div>
 
-                <div class="feedback-section">
-                    <h3><i class="fa-solid fa-book-open-reader" style="color: #d97706;"></i> 추천 학술 담화 표지</h3>
-                    ${recTags ? `<div class="tag-list">${recTags}</div>` : `<div class="feedback-text">충분하고 훌륭한 표현이 사용되었습니다.</div>`}
-                </div>
+                    <div class="feedback-section">
+                        <h3><i class="fa-solid fa-book-open-reader" style="color: #dc2626;"></i> 학습이 필요한 추천 담화 표지 (누락)</h3>
+                        ${missedTags ? `<div class="tag-list">${missedTags}</div>` : `<div style="color: var(--primary); font-weight:600;"><i class="fa-solid fa-star"></i> 완벽합니다! 필수적인 학술 표현을 골고루 잘 사용하셨습니다.</div>`}
+                    </div>
 
-                <div class="feedback-section">
-                    <h3><i class="fa-solid fa-comment-dots" style="color: var(--primary);"></i> 종합 피드백</h3>
-                    <div class="feedback-text">
-                        <p style="margin-bottom: 0.75rem;"><strong>[발표 흐름]</strong><br>${data.speedFeedback || '기록된 피드백이 없습니다.'}</p>
-                        <p><strong>[논리 전개]</strong><br>${data.generalFeedback || '기록된 피드백이 없습니다.'}</p>
+                    <div class="feedback-section" style="grid-column: 1 / -1;">
+                        <h3><i class="fa-solid fa-comment-dots" style="color: var(--primary);"></i> 전문가 종합 코멘트</h3>
+                        <div class="feedback-text">
+                            <p style="margin-bottom: 1rem;"><strong>[발표 속도 및 흐름]</strong><br>${data.speed_feedback || '기록된 내용이 없습니다.'}</p>
+                            <p><strong>[논리 전개 및 종합 평가]</strong><br>${data.overall_feedback || '기록된 내용이 없습니다.'}</p>
+                        </div>
                     </div>
                 </div>
             `;
@@ -641,8 +627,8 @@
         btnPdf.addEventListener('click', () => {
             const element = document.getElementById('report-container');
             const opt = {
-                margin:       10,
-                filename:     `학술발표_리포트_${new Date().toISOString().slice(0,10)}.pdf`,
+                margin:       [10, 10, 10, 10],
+                filename:     `학술발표평가서_${new Date().toISOString().slice(0,10)}.pdf`,
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { scale: 2, useCORS: true, logging: false },
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
@@ -653,7 +639,7 @@
             
             html2pdf().set(opt).from(element).save().then(() => {
                 element.classList.remove('pdf-mode');
-                showToast("PDF가 저장되었습니다.", "success");
+                showToast("PDF가 성공적으로 저장되었습니다.", "success");
             });
         });
 
