@@ -184,7 +184,7 @@
                 <div class="card" style="display: flex; flex-direction: column; flex-grow: 1;">
                     <h2>📝 발표 스크립트</h2>
                     <div id="scriptDisplay" class="script-box">녹음을 시작하면 이곳에 스크립트가 작성됩니다...</div>
-                    <button id="evalBtn" class="btn-eval" onclick="evaluateScript()" style="display: none;">AI 학술 평가 받기</button>
+                    <button id="evalBtn" class="btn-eval" onclick="evaluateScript()">AI 학술 평가 받기</button>
                 </div>
             </div>
 
@@ -232,6 +232,7 @@
         let startTime;
         let timerInterval;
         let totalSeconds = 0;
+let lastInterim = '';
 
         function showToast(message) {
             const toast = document.getElementById('toast');
@@ -261,7 +262,8 @@
                     }
                 }
                 document.getElementById('scriptDisplay').innerHTML = finalTranscript + '<span style="color:#9CA3AF;">' + interimTranscript + '</span>';
-                updateStats();
+lastInterim = interimTranscript;                
+updateStats();
             };
 
             rec.onerror = (event) => {
@@ -271,13 +273,14 @@
                 }
             };
 
-            rec.onend = () => {
+rec.onend = () => {
     if (isRecording) {
         try { rec.start(); } catch(e) {}
-    } else {
-        if (finalTranscript.trim().length > 10) {
-            document.getElementById('evalBtn').style.display = 'block';
-        }
+    } else if (lastInterim) {
+        finalTranscript += lastInterim + ' ';
+        lastInterim = '';
+        document.getElementById('scriptDisplay').innerText = finalTranscript;
+        updateStats();
     }
 };
             return rec;
@@ -287,9 +290,9 @@
             if (isRecording) return;
             
             finalTranscript = '';
+lastInterim = '';
             totalSeconds = 0;
             document.getElementById('scriptDisplay').innerHTML = '';
-            document.getElementById('evalBtn').style.display = 'none';
             document.getElementById('resultArea').style.display = 'none';
             document.getElementById('emptyResult').style.display = 'block';
             
