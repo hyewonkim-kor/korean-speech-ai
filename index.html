@@ -184,6 +184,10 @@
                 <div class="card" style="display: flex; flex-direction: column; flex-grow: 1;">
                     <h2>📝 발표 스크립트</h2>
                     <div id="scriptDisplay" class="script-box">녹음을 시작하면 이곳에 스크립트가 작성됩니다...</div>
+<div id="playbackBox" style="display:none; margin-top:10px;">
+    <p style="margin:0 0 6px 0; font-size:13px; color:var(--text-muted);">🎧 내 발표 다시 듣기</p>
+    <audio id="audioPlayer" controls style="width:100%;"></audio>
+</div>
                     <button id="evalBtn" class="btn-eval" onclick="evaluateScript()">AI 학술 평가 받기</button>
                 </div>
             </div>
@@ -233,6 +237,9 @@
         let timerInterval;
         let totalSeconds = 0;
 let lastInterim = '';
+let mediaRecorder;
+let audioChunks = [];
+let audioStream;
 
         function showToast(message) {
             const toast = document.getElementById('toast');
@@ -270,6 +277,33 @@ updateStats();
                 if (event.error === 'not-allowed') {
                     showToast("마이크 권한이 차단되었습니다. 브라우저 설정에서 마이크를 허용해주세요.");
                     stopRecording();
+async function startAudioRecording() {
+    try {
+        audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioChunks = [];
+        mediaRecorder = new MediaRecorder(audioStream);
+        mediaRecorder.ondataavailable = (e) => {
+            if (e.data.size > 0) audioChunks.push(e.data);
+        };
+        mediaRecorder.onstop = () => {
+            const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+            document.getElementById('audioPlayer').src = URL.createObjectURL(blob);
+            document.getElementById('playbackBox').style.display = 'block';
+        };
+        mediaRecorder.start();
+    } catch (e) {
+        showToast("다시 듣기용 녹음을 시작하지 못했습니다. (스크립트 인식은 계속됩니다)");
+    }
+}
+
+function stopAudioRecording() {
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        mediaRecorder.stop();
+    }
+    if (audioStream) {
+        audioStream.getTracks().forEach(t => t.stop());
+    }
+}
                 }
             };
 
@@ -295,12 +329,15 @@ lastInterim = '';
             document.getElementById('scriptDisplay').innerHTML = '';
             document.getElementById('resultArea').style.display = 'none';
             document.getElementById('emptyResult').style.display = 'block';
+document.getElementById('playbackBox').style.display = 'none';
+document.getElementById('audioPlayer').src = '';
             
             recognition = initSpeechRecognition();
             if (!recognition) return;
 
             try {
                 recognition.start();
+startAudioRecording();
                 isRecording = true;
                 document.getElementById('startBtn').style.display = 'none';
                 document.getElementById('stopBtn').style.display = 'inline-block';
@@ -316,6 +353,7 @@ lastInterim = '';
             if (!isRecording) return;
             isRecording = false;
             if (recognition) recognition.stop();
+stopAudioRecording();
             clearInterval(timerInterval);
             
             document.getElementById('startBtn').style.display = 'inline-block';
@@ -393,10 +431,11 @@ lastInterim = '';
 ${criteriaPrompt}
 
 규칙:
-1. 100점 만점으로 점수를 환산해줘 (totalScore). 기본 발표 내용 점수에, 위 15개 항목 중 발견된 표현 1개당 가산점을 부여해서 계산해.
+1. 100점 만점으로 점수를 환산해줘 (totalScore). 기본 발표 내용 점수에, 위 15개 항목 중 발견된 표현 1개당 가산점을 부여해서 계산하는데 너무 낮지 않게 점수를 줘.
 2. 학생이 사용한 표현 카테고리 목록을 찾아 (used).
 3. 사용하지 않은 카테고리 목록을 찾아 (missed).
 4. 개선을 위한 따뜻하고 전문적인 종합 피드백(feedback)을 작성해.
+5. '한국언론진흥재단'을 '한국 언론 진흥 재단'으로 띄어서 말하는 것은 감점하지 마. 외국인 화자 특유의 거센소리 발음은 약간 냉정하게 평가해 줘.
 
 JSON 응답 구조 예시:
 {
