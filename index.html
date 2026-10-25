@@ -277,25 +277,35 @@ updateStats();
                 if (event.error === 'not-allowed') {
                     showToast("마이크 권한이 차단되었습니다. 브라우저 설정에서 마이크를 허용해주세요.");
                     stopRecording();
-async function startAudioRecording() {
+async function startRecording() {
+    if (isRecording) return;
+
+    finalTranscript = '';
+    lastInterim = '';
+    totalSeconds = 0;
+    document.getElementById('scriptDisplay').innerHTML = '';
+    document.getElementById('playbackBox').style.display = 'none';
+    document.getElementById('audioPlayer').src = '';
+    document.getElementById('resultArea').style.display = 'none';
+    document.getElementById('emptyResult').style.display = 'block';
+
+    recognition = initSpeechRecognition();
+    if (!recognition) return;
+
+    await startAudioRecording();
+
     try {
-        audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        audioChunks = [];
-        mediaRecorder = new MediaRecorder(audioStream);
-        mediaRecorder.ondataavailable = (e) => {
-            if (e.data.size > 0) audioChunks.push(e.data);
-        };
-        mediaRecorder.onstop = () => {
-            const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
-            document.getElementById('audioPlayer').src = URL.createObjectURL(blob);
-            document.getElementById('playbackBox').style.display = 'block';
-        };
-        mediaRecorder.start();
-    } catch (e) {
-        showToast("다시 듣기용 녹음을 시작하지 못했습니다. (스크립트 인식은 계속됩니다)");
+        recognition.start();
+        isRecording = true;
+        document.getElementById('startBtn').style.display = 'none';
+        document.getElementById('stopBtn').style.display = 'inline-block';
+        startTime = Date.now();
+        timerInterval = setInterval(updateTimer, 1000);
+        showToast("녹음이 시작되었습니다.");
+    } catch (error) {
+        showToast("마이크를 시작할 수 없습니다.");
     }
 }
-
 function stopAudioRecording() {
     if (mediaRecorder && mediaRecorder.state !== 'inactive') {
         mediaRecorder.stop();
